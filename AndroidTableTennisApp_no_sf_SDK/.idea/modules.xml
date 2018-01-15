@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidTableTennisApp_no_sf_SDK.iml" filepath="$PROJECT_DIR$/AndroidTableTennisApp_no_sf_SDK.iml" />
+      <module fileurl="file://C:\Users\Rostyslav\Desktop\AndroidTechMagicNoSDK\SalesforceAndroidAppWithoutSdk\AndroidTableTennisApp_no_sf_SDK\AndroidTableTennisApp_no_sf_SDK.iml" filepath="C:\Users\Rostyslav\Desktop\AndroidTechMagicNoSDK\SalesforceAndroidAppWithoutSdk\AndroidTableTennisApp_no_sf_SDK\AndroidTableTennisApp_no_sf_SDK.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\Rostyslav\Desktop\AndroidTechMagicNoSDK\SalesforceAndroidAppWithoutSdk\AndroidTableTennisApp_no_sf_SDK\app\app.iml" filepath="C:\Users\Rostyslav\Desktop\AndroidTechMagicNoSDK\SalesforceAndroidAppWithoutSdk\AndroidTableTennisApp_no_sf_SDK\app\app.iml" />
     </modules>
   </component>
 </project>

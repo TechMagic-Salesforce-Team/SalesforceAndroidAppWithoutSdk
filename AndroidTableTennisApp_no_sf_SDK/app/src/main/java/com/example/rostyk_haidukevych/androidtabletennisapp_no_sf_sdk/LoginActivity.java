@@ -3,10 +3,12 @@ package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.app.LoaderManager.LoaderCallbacks;
 
@@ -204,7 +206,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             //mAuthTask.execute((Void) null);
-            findPlayerByEmailAndPasswordRest(email, password);
+            if (Sf_Rest_Syncronizer.getInstance().getAuthSettings() == null) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(getString(R.string.bad_wifi_connection))
+                        .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // FIRE ZE MISSILES!
+                            }
+                        });
+                builder.create();
+                builder.show();
+                mAuthTask.cancel(true);
+            } else {
+                findPlayerByEmailAndPasswordRest(email, password);
+            }
         }
     }
 
@@ -247,6 +262,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
                         Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(mainActivity);
+                    } else {
+                        System.out.println("No such user found");
+                        mAuthTask.cancel(true);
+                        mEmailView.setError("No user found with such email address");
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

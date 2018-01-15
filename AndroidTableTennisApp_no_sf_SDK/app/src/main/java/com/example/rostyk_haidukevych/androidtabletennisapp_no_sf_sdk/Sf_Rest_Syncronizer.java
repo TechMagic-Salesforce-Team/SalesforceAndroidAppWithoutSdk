@@ -1,5 +1,9 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
+
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -21,16 +25,17 @@ import okhttp3.Response;
  */
 
 public class Sf_Rest_Syncronizer {
-
+    public static Activity currentActivity = null;
     private final String ORG_USERNAME = "rgaidukevych@gmail.com";
     private final String ORG_PASSWORD = "hjcnbrgo919979";
     private final String ORG_SECURITY_TOKEN = "eKNzvIdrCnrBIM4chDlV8FAQE";
     private String ACCESS_TOKEN = "";
 
     private static final String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
-    private static final String CLIENT_ID = "3MVG9HxRZv05HarQDQcBkT_chF.RWVZHSA8FLCkfvwl8OYnEHdvQFtc3lBrlRYzmIRPqz5qzTqPMUUJq1q.xz";
+    private static final String CLIENT_ID =
+            "3MVG9HxRZv05HarQDQcBkT_chF.RWVZHSA8FLCkfvwl8OYnEHdvQFtc3lBrlRYzmIRPqz5qzTqPMUUJq1q.xz";
     private static final String CLIENT_SECRET = "6823072746201649040";
-    private static String VERSION_NUMBER = "";
+    private static String VERSION_NUMBER = null;
 
     private RestAuthSfSettings authSettings = null;
 
@@ -44,7 +49,6 @@ public class Sf_Rest_Syncronizer {
         if (instance==null) {
             instance = new Sf_Rest_Syncronizer();
             instance.auth();
-            while (instance.authSettings==null) {}
             instance.getVersionNumberRestApi();
         }
         return instance;
@@ -84,7 +88,8 @@ public class Sf_Rest_Syncronizer {
                             try {
                                 JSONObject jsonObject = new JSONObject(responseSBody);
                                 //ACCESS_TOKEN = jsonObject.getString("access_token");
-                                setACCESS_TOKEN_From_Async_Response(jsonObject.getString("access_token"));
+                                setACCESS_TOKEN_From_Async_Response(
+                                        jsonObject.getString("access_token"));
                                 setAuthSettings(jsonObject);
                             } catch (JSONException e) {
                                 e.printStackTrace();
@@ -95,6 +100,15 @@ public class Sf_Rest_Syncronizer {
     }
 
     private void getVersionNumberRestApi() {
+        if (instance.getAuthSettings()==null) {
+            try {
+                Thread.sleep(1000);
+                getVersionNumber();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         try {
             OkHttpClient client = new OkHttpClient();
             String url = authSettings.getInstance_url() + "/services/data/";
@@ -118,7 +132,8 @@ public class Sf_Rest_Syncronizer {
                     try {
                         JSONArray jsonArray = new JSONArray(response.body().string());
                         if (jsonArray.length() > 0) {
-                            setVersionNumber(jsonArray.getJSONObject(jsonArray.length()-1).getString("version"));
+                            setVersionNumber(jsonArray.getJSONObject(jsonArray.length()-1)
+                                    .getString("version"));
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();

@@ -8,12 +8,4 @@ import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.cl
 
 public class PlayerSession {
     public static Player__c currentPlayer = null;
-
-    public Player__c getCurrentPlayer() {
-        return currentPlayer;
-    }
-
-    public void setCurrentPlayer(Player__c currentPlayer) {
-        this.currentPlayer = currentPlayer;
-    }
 }

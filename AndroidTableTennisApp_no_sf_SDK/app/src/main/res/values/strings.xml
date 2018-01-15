@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">AndroidTableTennisApp_no_sf_SDK</string>
+    <string name="app_name">TechMagic Table Tennis</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_login">Sign in</string>
@@ -15,5 +15,8 @@
     <string name="error_field_required">This field is required</string>
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
+    </string>
+    <string name="bad_wifi_connection">
+        Bad wifi-connection, unable to load data
     </string>
 </resources>

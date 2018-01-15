@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <EditText
+        android:id="@+id/email_field"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textEmailAddress"
+        android:hint="Email"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="20dp"
+        />
+
+    <EditText
+        android:id="@+id/LastNameField"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/NameField"
+        android:ems="10"
+        android:inputType="textPassword"
+        android:hint="Password"
+        android:layout_marginLeft="50dp"
+        android:layout_marginTop="20dp"
+        />
+
+    <Button
+        android:id="@+id/addContact"
+        android:layout_width="114dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/LastNameField"
+        android:layout_marginTop="24dp"
+        android:onClick="onAddContactClick"
+        android:text="Add"
+        android:background="@color/sf__blue"
+        android:textColor="@color/sf_white"
+        android:layout_marginLeft="50dp"
+        />
+
+</LinearLayout>

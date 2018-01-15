@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+
+    <TableLayout
+        android:id="@+id/home_layout_table"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="50dp"
+        android:background="#FFF"
+        android:stretchColumns="*"
+        >
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0"
+            >
+
+            <ImageButton
+                android:id="@+id/AllTournamentsButton"
+                android:layout_width="0dp"
+                android:layout_height="169dp"
+                android:layout_weight=".30"
+                android:src="@drawable/all_tournaments"
+                android:scaleType="centerCrop"
+                android:onClick="allTournamentsClick"
+                />
+            <ImageButton
+                android:id="@+id/AllPlayersButton"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight=".30"
+                android:src="@drawable/all_players"
+                android:scaleType="centerCrop"
+                android:layout_marginLeft="10dp"
+                />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0"
+            >
+
+            <Button
+                android:layout_width="120dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="10dp"
+                android:background="@color/sf__chrome_nav_bar_azure"
+                android:text="Sync elements"
+                android:textColor="@color/sf_white"
+                android:textSize="12dp"
+                android:id="@+id/load_tournaments_button"
+                android:minWidth="120dp"
+                />
+        </TableRow>
+
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0">
+
+            <EditText
+                android:id="@+id/name_tournament_input"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/NameField"
+                android:layout_marginTop="16dp"
+                android:hint="Name"
+                android:inputType="textPersonName"
+                android:maxLength="16"
+                android:minWidth="120dp"
+                />
+
+            <Spinner
+                android:id="@+id/type_tournament_input"
+                android:layout_width="85dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <Spinner
+                android:id="@+id/format_tournament_input"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+            <Spinner
+                android:id="@+id/status_tournament_spinner"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp" />
+
+        </TableRow>
+
+
+
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:stretchColumns="0"
+            android:layout_marginTop="20dp"
+            >
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dip"
+                android:text="Name"
+                android:textSize="20dp"
+                android:textColor="@color/sf_grey"
+                android:minWidth="140dp"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dip"
+                android:text="Type"
+                android:textSize="20dp"
+                android:textColor="@color/sf_grey"
+                />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dip"
+                android:text="Format"
+                android:textSize="20dp"
+                android:textColor="@color/sf_grey"
+                />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dip"
+                android:text="Status"
+                android:textSize="20dp"
+                android:textColor="@color/sf_grey"
+                />
+
+        </TableRow>
+    </TableLayout>
+
+</LinearLayout>
+
+
+

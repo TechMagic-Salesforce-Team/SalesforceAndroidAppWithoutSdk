@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="sf__warning_color">#f4511e</color>
+    <color name="sf__hint_color">#42000000</color>
+    <color name="sf__success_color">#009688</color>
+    <color name="sf__blue">#33AFFF</color>
+    <color name="sf__inspector_button_background_color">#ccc</color>
+    <color name="sf__inspector_text_background_color">#eeeeee</color>
+    <color name="sf__inspector_text_color">#00aa00</color>
+    <color name="sf__inspector_cell_background_color">#eeeeee</color>
+    <color name="sf__inspector_cell_text_color">#000000</color>
+    <color name="sf_grey">#C0C0C0</color>
+    <color name="sf_white">#FFFFFF</color>
+    <color name="sf__passcode_layout_bg">#000000</color>
+    <color name="sf__passcode_bg">#888888</color>
+    <color name="sf__forgot_passcode_text">#000</color>
+    <color name="sf__passcode_error_text">#F00</color>
+    <color name="sf__chrome_nav_bar_azure">#1589ee</color>
+</resources>

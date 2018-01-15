@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="48dp"
+    android:padding="3dp" android:background="@color/sf_white">
+
+
+    <Button android:id="@+id/login_logout_button" android:layout_width="wrap_content"
+        android:layout_height="wrap_content" android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" android:onClick="onLoginLogoutClick"
+        android:background="@color/sf__blue"
+        android:textColor="@color/sf_white"
+        android:text="Login"
+        />
+
+</RelativeLayout>

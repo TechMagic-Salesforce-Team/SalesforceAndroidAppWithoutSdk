@@ -11,7 +11,7 @@ public class Player__c {
     public String password;
     public ROLE role;
 
-    enum ROLE {
+    public static enum ROLE {
         USER, ADMIN
     }
 

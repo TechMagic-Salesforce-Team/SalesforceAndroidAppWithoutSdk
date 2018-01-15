@@ -273,7 +273,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void onLoginLogoutClick(View v) {
         System.out.println("btn access token clicked: "+Sf_Rest_Syncronizer.getInstance().
-                getAuthSettings()+", and vn: "+Sf_Rest_Syncronizer.getInstance().getVersionNumber());
+                getAuthSettings()+", and vn: "+Sf_Rest_Syncronizer.getInstance().getVersionNumber()+
+                ", player in session: "+PlayerSession.currentPlayer);
         Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
         startActivity(loginActivity);
     }

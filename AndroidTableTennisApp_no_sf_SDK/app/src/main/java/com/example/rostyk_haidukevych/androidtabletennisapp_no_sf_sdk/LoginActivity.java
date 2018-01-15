@@ -3,6 +3,7 @@ package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -29,8 +30,11 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
+
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -200,22 +204,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             //mAuthTask.execute((Void) null);
-
+            findPlayerByEmailAndPasswordRest(email, password);
         }
     }
 
-    private boolean findPlayerByEmailAndPasswordRest(String email, String password) {
-        String soql = "SELECT+Id, Name, Email__c, Password__c, IsManager__c from Player__c where "
-                + " Email__c = '" + email + "' and Password__c = '" + password + "'";
+    //Password can not be filtered in query call
+    private boolean findPlayerByEmailAndPasswordRest(final String email, String password) {
+        String soql = "SELECT+Id,Name,IsManager__c,Email__c,Password__c+from+Player__c+where"
+                + "+Email__c+=+'" + email + "'";
         OkHttpClient client = new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
-                "/services/data/" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
+                "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
                 + soql;
         System.out.println("url : " + url);
         final Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Accept", "application/json")
-                .addHeader("Authentication", "Bearer " + Sf_Rest_Syncronizer.getInstance().getACCESS_TOKEN())
+                .addHeader("Authorization", "Bearer " + Sf_Rest_Syncronizer.getInstance().getACCESS_TOKEN())
                 .build();
         client.newCall(request).enqueue(new Callback() {
 
@@ -226,7 +231,26 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                //System.out.println("Response body => " + response.body().string());
+                try {
+                    JSONObject responseObject = new JSONObject(response.body().string());
+                    JSONArray records = responseObject.getJSONArray("records");
+                    System.out.println("records "+records.toString());
+                    if (records != null && records.length() > 0) {
+                        JSONObject currentPlayer = records.getJSONObject(0);
+                        PlayerSession.currentPlayer = new Player__c();
+                        PlayerSession.currentPlayer.email = email;
+                        PlayerSession.currentPlayer.password = currentPlayer.getString("Password__c");
+                        PlayerSession.currentPlayer.id = currentPlayer.getString("Id");
+                        PlayerSession.currentPlayer.name = currentPlayer.getString("Name");
+                        PlayerSession.currentPlayer.role = currentPlayer.getBoolean("IsManager__c")
+                                ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
+
+                        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(mainActivity);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
             }
         });

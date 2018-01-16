@@ -19,4 +19,5 @@
     <color name="sf__forgot_passcode_text">#000</color>
     <color name="sf__passcode_error_text">#F00</color>
     <color name="sf__chrome_nav_bar_azure">#1589ee</color>
+    <color name="sf__whiteyellow">	#FFF5EE</color>
 </resources>

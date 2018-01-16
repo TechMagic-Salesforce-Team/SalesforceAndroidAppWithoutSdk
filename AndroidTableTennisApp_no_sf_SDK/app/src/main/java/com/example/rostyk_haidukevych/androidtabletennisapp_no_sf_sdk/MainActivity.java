@@ -475,8 +475,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void setupViewPager(ViewPager viewPager) {
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
-        adapter.addFragment(new Tab1Fragment(), "Tab1");
-        adapter.addFragment(new Tab2Fragment(), "Tab2");
+        adapter.addFragment(new Tab1Fragment(), "Home");
+        adapter.addFragment(new Tab2Fragment(), "Profile");
         viewPager.setAdapter(adapter);
     }
 

@@ -301,24 +301,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     responseBody = responseBody.substring(1,responseBody.length()-1);
                     System.out.println("resp body : "+responseBody);
                     JSONObject responseObject = new JSONObject(responseBody);
-                    if (responseObject.getString("message").equals("wrong email")) {
+                    if (responseObject.has("message") && responseObject.
+                            getString("message").equals("wrong email")) {
                         System.out.println("No such user found");
                         mAuthTask.cancel(true);
                         mEmailView.setError("No user found with such email address");
-                    } else if (responseObject.getString("message").equals("wrong password")) {
+                    } else if (responseObject.has("message")
+                            && responseObject.getString("message").equals("wrong password")) {
                         System.out.println("No such user found");
                         mAuthTask.cancel(true);
                         mPasswordView.setError("No user found with such password");
-                    } else{
+                    } else {
                         PlayerSession.currentPlayer = new Player__c();
                         PlayerSession.currentPlayer.email = email;
                         PlayerSession.currentPlayer.password = password;
                         PlayerSession.currentPlayer.id = responseObject.getString("Id");
                         PlayerSession.currentPlayer.name = responseObject.getString("Name");
-                        PlayerSession.currentPlayer.role = responseObject.getBoolean("IsManager__c")
+                        PlayerSession.currentPlayer.role =
+                                responseObject.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
+                        System.out.println("Player session : "+PlayerSession.currentPlayer.name);
+                        Intent mainActivity = new Intent
+                                (getApplicationContext(), MainActivity.class);
 
-                        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(mainActivity);
                     }
                 } catch (JSONException e) {

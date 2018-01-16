@@ -2,6 +2,7 @@ package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 
 import com.google.gson.Gson;
@@ -49,6 +50,7 @@ public class Sf_Rest_Syncronizer {
         if (instance==null) {
             instance = new Sf_Rest_Syncronizer();
             instance.auth();
+            while (instance.getAuthSettings()==null) {}
             instance.getVersionNumberRestApi();
         }
         return instance;
@@ -101,12 +103,13 @@ public class Sf_Rest_Syncronizer {
 
     private void getVersionNumberRestApi() {
         if (instance.getAuthSettings()==null) {
-            try {
-                Thread.sleep(1000);
-                getVersionNumber();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                Thread.sleep(1000);
+//                getVersionNumber();
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+            getVersionNumber();
         }
 
         try {

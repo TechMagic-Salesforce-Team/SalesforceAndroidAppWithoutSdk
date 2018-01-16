@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -33,6 +34,8 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.mail.GMailSender;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.mail.SendEmailMainThread;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Tournament__c;
 import com.google.gson.Gson;
 
@@ -489,6 +492,9 @@ public class MainActivity extends AppCompatActivity {
         System.out.println("btn access token clicked: "+Sf_Rest_Syncronizer.getInstance().
                 getAuthSettings()+", and vn: "+Sf_Rest_Syncronizer.getInstance().getVersionNumber()+
                 ", player in session: "+PlayerSession.currentPlayer);
+
+        //new Thread(new SendEmailMainThread(new String[] {"rgaidukevich9@gmail.com", "rostyslav.haydukevych@techmagic.co"})).start();
+
         if (PlayerSession.currentPlayer == null) {
             Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(loginActivity);

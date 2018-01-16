@@ -218,7 +218,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 builder.show();
                 mAuthTask.cancel(true);
             } else {
-                findPlayerByEmailAndPasswordRest(email, password);
+                findPlayerByEmailAndPasswordRestCustomApi(email, password);
             }
         }
     }
@@ -276,6 +276,62 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
         return false;
     }
+
+    private boolean findPlayerByEmailAndPasswordRestCustomApi(final String email, final String password) {
+        OkHttpClient client = new OkHttpClient();
+        String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
+                "/services/apexrest/players/credentials?email=" + email+"&password="+password;
+        System.out.println("url : " + url);
+        final Request request = new Request.Builder()
+                .url(url)
+                .addHeader("From", "0050Y000001qzSSQAY")
+                .addHeader("Authorization", "Bearer " + Sf_Rest_Syncronizer.getInstance().getACCESS_TOKEN())
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                System.out.println("Failed");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try {
+                    String responseBody = response.body().string();
+                    responseBody = responseBody.substring(1,responseBody.length()-1);
+                    System.out.println("resp body : "+responseBody);
+                    JSONObject responseObject = new JSONObject(responseBody);
+                    if (responseObject.getString("message").equals("wrong email")) {
+                        System.out.println("No such user found");
+                        mAuthTask.cancel(true);
+                        mEmailView.setError("No user found with such email address");
+                    } else if (responseObject.getString("message").equals("wrong password")) {
+                        System.out.println("No such user found");
+                        mAuthTask.cancel(true);
+                        mPasswordView.setError("No user found with such password");
+                    } else{
+                        PlayerSession.currentPlayer = new Player__c();
+                        PlayerSession.currentPlayer.email = email;
+                        PlayerSession.currentPlayer.password = password;
+                        PlayerSession.currentPlayer.id = responseObject.getString("Id");
+                        PlayerSession.currentPlayer.name = responseObject.getString("Name");
+                        PlayerSession.currentPlayer.role = responseObject.getBoolean("IsManager__c")
+                                ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
+
+                        Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
+                        startActivity(mainActivity);
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        return false;
+    }
+
+
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic

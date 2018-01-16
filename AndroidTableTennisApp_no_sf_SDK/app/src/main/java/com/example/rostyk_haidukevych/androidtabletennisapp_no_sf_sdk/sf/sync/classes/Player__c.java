@@ -5,10 +5,12 @@ package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.c
  */
 
 public class Player__c {
-    public String id;
-    public String name;
-    public String email;
-    public String password;
+    public String Id;
+    public String Name;
+    public String Email__c;
+    public String Password__c;
+    public Boolean IsManager__c;
+    public String Status__c;
     public ROLE role;
 
     public static enum ROLE {

@@ -1,11 +1,9 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -15,9 +13,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.InputType;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,10 +28,9 @@ import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.mail.GMailSender;
-import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.mail.SendEmailMainThread;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.TournamentSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Tournament__c;
 import com.google.gson.Gson;
 
@@ -44,7 +39,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -53,10 +47,8 @@ import java.util.Map;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
@@ -366,8 +358,8 @@ public class MainActivity extends AppCompatActivity {
                 public void onClick(View v) {
                     TournamentSession.tournamentSelected = (Tournament__c)
                             new Gson().fromJson(String.valueOf(tournament), Tournament__c.class);
-                    Intent tournamentActivity = new Intent(getContext(), LoginActivity.class);
-                    startActivity(tournamentActivity);
+                    Intent tournamentInfoActivity = new Intent(getContext(), GamesListActivity.class);
+                    startActivity(tournamentInfoActivity);
                 }
             });
         }

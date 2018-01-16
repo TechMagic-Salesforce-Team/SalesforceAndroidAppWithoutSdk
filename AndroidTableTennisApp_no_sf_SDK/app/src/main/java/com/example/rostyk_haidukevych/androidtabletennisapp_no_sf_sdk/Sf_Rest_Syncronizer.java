@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -52,6 +54,8 @@ public class Sf_Rest_Syncronizer {
             instance.auth();
             while (instance.getAuthSettings()==null) {}
             instance.getVersionNumberRestApi();
+            while (instance.getVersionNumber()==null) {}
+            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c+from+Player__c");
         }
         return instance;
     }
@@ -102,15 +106,14 @@ public class Sf_Rest_Syncronizer {
     }
 
     private void getVersionNumberRestApi() {
-        if (instance.getAuthSettings()==null) {
+//        if (instance.getAuthSettings()==null) {
 //            try {
 //                Thread.sleep(1000);
 //                getVersionNumber();
 //            } catch (InterruptedException e) {
 //                e.printStackTrace();
 //            }
-            getVersionNumber();
-        }
+//        }
 
         try {
             OkHttpClient client = new OkHttpClient();
@@ -147,6 +150,51 @@ public class Sf_Rest_Syncronizer {
             e.printStackTrace();
         }
     }
+
+
+
+
+    public void getAllPlayersSync(String soql) {
+        try {
+            OkHttpClient client = new OkHttpClient();
+            String url = authSettings.getInstance_url() + "/services/data/v"+getVersionNumber()+"/query?q="+soql;
+            System.out.println("url : "+url);
+
+            final Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("Accept", "application/json")
+                    .addHeader("Authorization", "Bearer "+authSettings.getAccess_token())
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    System.out.println("Failed");
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    try {
+                        JSONArray jsonArray = new JSONObject(response.body().string()).getJSONArray("records");
+                        if (jsonArray.length() > 0) {
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                JSONObject playerJson = jsonArray.getJSONObject(i);
+                                Player__c player = (Player__c) new Gson().fromJson(playerJson.toString(), Player__c.class);
+                                PlayerSession.allPlayersSync.put(player.Id, player);
+                            }
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     public void setVersionNumber(String versionNumber) {
         VERSION_NUMBER = versionNumber;

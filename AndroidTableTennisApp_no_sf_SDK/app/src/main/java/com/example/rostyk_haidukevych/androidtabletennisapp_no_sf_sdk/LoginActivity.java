@@ -32,6 +32,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
 
 import org.json.JSONArray;
@@ -253,10 +254,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                     if (records != null && records.length() > 0) {
                         JSONObject currentPlayer = records.getJSONObject(0);
                         PlayerSession.currentPlayer = new Player__c();
-                        PlayerSession.currentPlayer.email = email;
-                        PlayerSession.currentPlayer.password = currentPlayer.getString("Password__c");
-                        PlayerSession.currentPlayer.id = currentPlayer.getString("Id");
-                        PlayerSession.currentPlayer.name = currentPlayer.getString("Name");
+                        PlayerSession.currentPlayer.Email__c = email;
+                        PlayerSession.currentPlayer.Password__c = currentPlayer.getString("Password__c");
+                        PlayerSession.currentPlayer.Id = currentPlayer.getString("Id");
+                        PlayerSession.currentPlayer.Name = currentPlayer.getString("Name");
+                        PlayerSession.currentPlayer.IsManager__c = currentPlayer.getBoolean("IsManager__c");
                         PlayerSession.currentPlayer.role = currentPlayer.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
 
@@ -313,14 +315,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         mPasswordView.setError("No user found with such password");
                     } else {
                         PlayerSession.currentPlayer = new Player__c();
-                        PlayerSession.currentPlayer.email = email;
-                        PlayerSession.currentPlayer.password = password;
-                        PlayerSession.currentPlayer.id = responseObject.getString("Id");
-                        PlayerSession.currentPlayer.name = responseObject.getString("Name");
+                        PlayerSession.currentPlayer.Email__c = email;
+                        PlayerSession.currentPlayer.Password__c = password;
+                        PlayerSession.currentPlayer.Id = responseObject.getString("Id");
+                        PlayerSession.currentPlayer.Name = responseObject.getString("Name");
+                        PlayerSession.currentPlayer.IsManager__c = responseObject.getBoolean("IsManager__c");
                         PlayerSession.currentPlayer.role =
                                 responseObject.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
-                        System.out.println("Player session : "+PlayerSession.currentPlayer.name);
+                        System.out.println("Player session : "+PlayerSession.currentPlayer.Name);
                         Intent mainActivity = new Intent
                                 (getApplicationContext(), MainActivity.class);
 

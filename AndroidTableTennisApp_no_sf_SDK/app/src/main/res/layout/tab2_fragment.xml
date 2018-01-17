@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
-
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hello from tab2"
-        android:textSize="20dp"
-        android:layout_marginLeft="120dp"
-        android:id="@+id/text_tab2"
-        android:textColor="@color/sf__warning_color"
-        />
-
-
+        <include layout="@layout/profile" android:visibility="gone"/>
+        <include layout="@layout/layout_if_not_logged_in" android:visibility="visible"/>
 </RelativeLayout>

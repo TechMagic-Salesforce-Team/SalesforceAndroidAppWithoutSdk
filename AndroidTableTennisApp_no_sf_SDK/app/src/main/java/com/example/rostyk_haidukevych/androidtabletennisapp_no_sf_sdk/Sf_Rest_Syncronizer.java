@@ -14,6 +14,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -52,10 +55,10 @@ public class Sf_Rest_Syncronizer {
         if (instance==null) {
             instance = new Sf_Rest_Syncronizer();
             instance.auth();
-            while (instance.getAuthSettings()==null) {}
-            instance.getVersionNumberRestApi();
-            while (instance.getVersionNumber()==null) {}
-            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c+from+Player__c");
+//            while (instance.getAuthSettings()==null) {}
+//            instance.getVersionNumberRestApi();
+//            while (instance.getVersionNumber()==null) {}
+//            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c+from+Player__c");
         }
         return instance;
     }
@@ -97,6 +100,7 @@ public class Sf_Rest_Syncronizer {
                                 setACCESS_TOKEN_From_Async_Response(
                                         jsonObject.getString("access_token"));
                                 setAuthSettings(jsonObject);
+                                instance.getVersionNumberRestApi();
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -104,6 +108,10 @@ public class Sf_Rest_Syncronizer {
                     }
         });
     }
+
+
+
+
 
     private void getVersionNumberRestApi() {
 //        if (instance.getAuthSettings()==null) {
@@ -140,6 +148,7 @@ public class Sf_Rest_Syncronizer {
                         if (jsonArray.length() > 0) {
                             setVersionNumber(jsonArray.getJSONObject(jsonArray.length()-1)
                                     .getString("version"));
+                            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c+from+Player__c");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -150,8 +159,6 @@ public class Sf_Rest_Syncronizer {
             e.printStackTrace();
         }
     }
-
-
 
 
     public void getAllPlayersSync(String soql) {

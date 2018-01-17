@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="100dp"
+    android:id="@+id/layout_no_user"
+    android:background="@color/sf_white">
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/sf__blue"
+        android:textColor="@color/sf_white"
+        android:text="Login To Access this Activity"
+        android:textSize="20dp"
+        />
+
+</RelativeLayout>

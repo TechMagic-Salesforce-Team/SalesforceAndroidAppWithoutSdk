@@ -12,6 +12,7 @@ public class Player__c {
     public Boolean IsManager__c;
     public String Status__c;
     public ROLE role;
+    public String Image__c;
 
     public static enum ROLE {
         USER, ADMIN

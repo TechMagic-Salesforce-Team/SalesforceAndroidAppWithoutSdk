@@ -226,7 +226,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     //Password can not be filtered in query call
     private boolean findPlayerByEmailAndPasswordRest(final String email, String password) {
-        String soql = "SELECT+Id,Name,IsManager__c,Email__c,Password__c+from+Player__c+where"
+        String soql = "SELECT+Id,Name,IsManager__c,Email__c,Password__c,Image__c+from+Player__c+where"
                 + "+Email__c+=+'" + email + "'";
         OkHttpClient client = new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
@@ -248,7 +248,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 try {
-                    JSONObject responseObject = new JSONObject(response.body().string());
+                    String responseBody = response.body().string();
+                    System.out.println("Response body: "+responseBody);
+                    JSONObject responseObject = new JSONObject(responseBody);
                     JSONArray records = responseObject.getJSONArray("records");
                     System.out.println("records "+records.toString());
                     if (records != null && records.length() > 0) {
@@ -259,6 +261,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         PlayerSession.currentPlayer.Id = currentPlayer.getString("Id");
                         PlayerSession.currentPlayer.Name = currentPlayer.getString("Name");
                         PlayerSession.currentPlayer.IsManager__c = currentPlayer.getBoolean("IsManager__c");
+                        PlayerSession.currentPlayer.Image__c = currentPlayer.getString("Image__c");
                         PlayerSession.currentPlayer.role = currentPlayer.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
 
@@ -279,6 +282,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         return false;
     }
 
+    //because Force.com api does not get data about Password__c (return this *********)
     private boolean findPlayerByEmailAndPasswordRestCustomApi(final String email, final String password) {
         OkHttpClient client = new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
@@ -320,6 +324,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         PlayerSession.currentPlayer.Id = responseObject.getString("Id");
                         PlayerSession.currentPlayer.Name = responseObject.getString("Name");
                         PlayerSession.currentPlayer.IsManager__c = responseObject.getBoolean("IsManager__c");
+                        PlayerSession.currentPlayer.Image__c = responseObject.getString("Image__c");
                         PlayerSession.currentPlayer.role =
                                 responseObject.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;

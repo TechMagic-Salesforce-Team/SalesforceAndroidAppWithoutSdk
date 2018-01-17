@@ -1,7 +1,11 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -24,6 +28,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -44,6 +50,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -171,14 +178,26 @@ public class MainActivity extends AppCompatActivity {
             formatSpinner = view.findViewById(R.id.format_tournament_input);
             nameInput = view.findViewById(R.id.name_tournament_input);
 
-            addItemsToSpinner(statusSpinner, Arrays.asList("Upcoming", "Current", "Completed"), InputType.S);
-            addItemsToSpinner(formatSpinner, Arrays.asList("1 x 1", "2 x 2"), InputType.F);
-            addItemsToSpinner(typeSpinner, Arrays.asList("RR", "SE", "DE"), InputType.T);
+            addItemsToSpinner(statusSpinner, Arrays.asList("Upcoming", "Current", "Completed"), InputType.S, getActivity());
+            addItemsToSpinner(formatSpinner, Arrays.asList("1 x 1", "2 x 2"), InputType.F, getActivity());
+            addItemsToSpinner(typeSpinner, Arrays.asList("RR", "SE", "DE"), InputType.T, getActivity());
 
 
-            setTheSameOnChangeToSpinners(statusSpinner);
-            setTheSameOnChangeToSpinners(typeSpinner);
-            setTheSameOnChangeToSpinners(formatSpinner);
+            setTheSameOnChangeToSpinners(
+                    nameInput,
+                    typeSpinner,
+                    formatSpinner,
+                    statusSpinner,
+                    tournamentsSync,
+                    getActivity(),
+                    tableLayout,
+                    this,
+                    TabFragmentType.TAB_1_FRAGMENT
+                    );
+
+
+//            setTheSameOnChangeToSpinners(typeSpinner, tableLayout);
+//            setTheSameOnChangeToSpinners(formatSpinner, tableLayout);
 
             nameInput.addTextChangedListener(new TextWatcher() {
                 @Override
@@ -189,13 +208,16 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                     // TODO Auto-generated method stub
-                    clearTable();
+                    clearTable(tableLayout);
                 }
 
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     try {
-                        findTournamentsByInputsAndFillTable();
+                        clearTable(tableLayout);
+                        List<TableRowAndJsonObject> tableRowsAndJsonObjects =
+                                findTournamentsByInputsAndFillTable(nameInput, typeSpinner, formatSpinner, statusSpinner, tournamentsSync, getActivity(), tableLayout);
+                        onRowClickForList(tableRowsAndJsonObjects);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (JSONException e) {
@@ -209,36 +231,20 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onClick(View v)
                 {
-                    clearTable();
+                    clearTable(tableLayout);
                     tryLoadTournaments();
                 }
             });
 
+            clearTable(tableLayout);
             tryLoadTournaments();
             return view;
         }
 
-        public void setTheSameOnChangeToSpinners(Spinner spinner){
-            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                @Override
-                public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                    // your code here
-                    try {
-                        clearTable();
-                        findTournamentsByInputsAndFillTable();
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parentView) {
-                    // your code here
-                }
-
-            });
+        public void onRowClickForList(List<TableRowAndJsonObject> tableRowsAndJsonObjects) {
+            for (TableRowAndJsonObject tableRowAndJsonObject : tableRowsAndJsonObjects) {
+                setOnRowClick(getContext(), tableRowAndJsonObject.tableRow, tableRowAndJsonObject.tournament);
+            }
         }
 
         public void tryLoadTournaments() {
@@ -263,23 +269,11 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        public void addItemsToSpinner(Spinner spinner, List<String> items, InputType inputType) {
-            List<String> spinnerItems = new ArrayList<String>();
-            spinnerItems.add(inputType.toString());
-            spinnerItems.addAll(items);
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
-                    android.R.layout.simple_spinner_item, spinnerItems);
-            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            spinner.setAdapter(dataAdapter);
-        }
 
-
-        private void clearTable(){
-            tableLayout.removeViews(4,tableLayout.getChildCount()-4);
-        }
 
         private void loadAllTournamentsToTheTable(String soql) {
             tournamentsSync.clear();
+            clearTable(tableLayout);
             OkHttpClient client = new OkHttpClient();
             String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                     "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
@@ -310,7 +304,8 @@ public class MainActivity extends AppCompatActivity {
                                 for (int i = 0; i < tournaments.length(); i++) {
                                     JSONObject tournament = tournaments.getJSONObject(i);
                                     tournamentsSync.put(tournament.getString("Id"), tournament);
-                                    addTableRow(tournament);
+                                    TableRow newTableRow = addTableRow(tournament, getActivity(), tournamentsSync, tableLayout);
+                                    setOnRowClick(getContext(), newTableRow, tournament);
                                 }
 
                             } catch (JSONException e) {
@@ -324,80 +319,22 @@ public class MainActivity extends AppCompatActivity {
             });
         }
 
-        private void addTableRow(JSONObject jsonObject) throws JSONException, InterruptedException {
-            TableRow tableRow = new TableRow(getActivity());
-            tableRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT));
-            tableRow.addView(makeColumn((String) jsonObject.get("Name")),0);
 
-            TextView typeText = makeColumn((String) ""+jsonObject.get("Type__c").toString().split(" ")[0].charAt(0)+
-                    jsonObject.get("Type__c").toString().split(" ")[1].charAt(0));
-
-            tableRow.addView(typeText,1);
-            tableRow.addView(makeColumn((String) jsonObject.get("Format__c")),2);
-            tableRow.addView(makeColumn((String) jsonObject.get("Status__c")),3);
-            tableRow.setPadding(0,10,0,0);
-            setOnRowClick(tableRow, jsonObject);
-            tournamentsSync.put(jsonObject.get("Id").toString(), jsonObject);
-            tableLayout.addView(tableRow);
+        enum InputType {
+            S, F, T
         }
 
 
-        private TextView makeColumn(String text) {
-            TextView textView = new TextView(getActivity());
-            textView.setText(text);
-            textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
-            textView.setTextColor(Color.parseColor("#000000"));
-            textView.setPadding(10,10,0,0);
-            return textView;
-        }
-
-        private void setOnRowClick(TableRow row, final JSONObject tournament){
+        private void setOnRowClick(final Context context, TableRow row, final JSONObject tournament){
             row.setClickable(true);  //allows you to select a specific row
             row.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     TournamentSession.tournamentSelected = (Tournament__c)
                             new Gson().fromJson(String.valueOf(tournament), Tournament__c.class);
-                    Intent tournamentInfoActivity = new Intent(getContext(), GamesListActivity.class);
-                    startActivity(tournamentInfoActivity);
+                    Intent tournamentInfoActivity = new Intent(context, GamesListActivity.class);
+                    context.startActivity(tournamentInfoActivity);
                 }
             });
-        }
-
-        private void findTournamentsByInputsAndFillTable() throws JSONException, InterruptedException {
-            String name = nameInput.getText().toString();
-
-            String type = typeSpinner.getSelectedItem().toString();
-
-            switch (type) {
-                case "RR" : type = "Round Robin"; break;
-                case "SE" : type = "Single Elimination"; break;
-                case "DE" : type = "Double Elimination"; break;
-            }
-
-            String format = formatSpinner.getSelectedItem().toString();
-            String status = statusSpinner.getSelectedItem().toString();
-
-            for (String key : tournamentsSync.keySet()) {
-                if (tournamentsSync.get(key).get("Name").toString().toUpperCase().contains(name.toUpperCase())
-                        &&
-                        (tournamentsSync.get(key).get("Type__c").toString().equals(type) ||
-                                type.equals(InputType.T.toString()))
-                        &&
-                        (tournamentsSync.get(key).get("Status__c").toString().equals(status) ||
-                                status.equals(InputType.S.toString()))
-                        &&
-                        (tournamentsSync.get(key).get("Format__c").toString().equals(format) ||
-                                format.equals(InputType.F.toString()))
-                        ) {
-                    addTableRow(tournamentsSync.get(key));
-                }
-            }
-        }
-
-
-        enum InputType {
-            S, F, T
         }
 
     }
@@ -410,29 +347,100 @@ public class MainActivity extends AppCompatActivity {
          * fragment.
          */
         private static final String ARG_SECTION_NUMBER = "section1_number";
+        private ImageView profileImage;
+        private Spinner profile_statusSpinner;
+        private Spinner profile_formatSpinner;
+        private Spinner profile_typeSpinner;
+        private EditText profile_nameInput;
+        private TableLayout profile_tableLayout;
+        private Map<String, JSONObject> profile_tournamentsSync = new HashMap<>();
 
         public Tab2Fragment() {
         }
 
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static Tab1Fragment newInstance(int sectionNumber) {
-            Tab1Fragment fragment = new Tab1Fragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
 
             View view = inflater.inflate(R.layout.tab2_fragment, container, false);
+
+            if (view == null) {
+                try {
+                    Thread.sleep(1000);
+                    onCreateView(inflater, container, savedInstanceState);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            profileImage = view.findViewById(R.id.profile_image);
+            RelativeLayout layout = view.findViewById(R.id.profile_layout);
+            RelativeLayout layoutIfNotLoggedIn = view.findViewById(R.id.layout_no_user);
+
+
+            if (PlayerSession.currentPlayer != null) {
+                layout.setVisibility(View.VISIBLE);
+                layoutIfNotLoggedIn.setVisibility(View.GONE);
+
+                String IMAGE_URL = PlayerSession.currentPlayer.Image__c;
+                        //!= null ?
+                        //PlayerSession.currentPlayer.Image__c
+                        //:
+                        //"https://i.pinimg.com/736x/8d/f7/42/8df742ad90ca58d3068fb3d7d2ba250f--art-clipart-art-images.jpg";
+                        //"http://4.bp.blogspot.com/-o9jPOvHK3FM/UH4P8W9PKLI/AAAAAAAABfg/DofoLsf5nHY/s1600/Nature-Blue-water-spiritual.jpg";
+                        //"https://static.pexels.com/photos/248797/pexels-photo-248797.jpeg";
+                        //"https://techmagic-table-tennis-developer-edition.eu11.force.com/servlet/servlet.FileDownload?file=0150Y000001ajjfQAA";
+                //System.out.println("Image: "+PlayerSession.currentPlayer.Image__c);
+                AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask().execute(IMAGE_URL);
+
+
+                profile_tableLayout = view.findViewById(R.id.profile_tournaments_table);
+                profile_statusSpinner = view.findViewById(R.id.status_profile_tournament_spinner);
+                profile_formatSpinner = view.findViewById(R.id.format_profile_tournament_input);
+                profile_typeSpinner = view.findViewById(R.id.type_profile_tournament_input);
+                profile_nameInput = view.findViewById(R.id.name_profile_tournament_input);
+
+
+                addItemsToSpinner(profile_statusSpinner, Arrays.asList("Upcoming", "Current", "Completed"), Tab1Fragment.InputType.S, getActivity());
+                addItemsToSpinner(profile_formatSpinner, Arrays.asList("1 x 1", "2 x 2"), Tab1Fragment.InputType.F, getActivity());
+                addItemsToSpinner(profile_typeSpinner, Arrays.asList("RR", "SE", "DE"), Tab1Fragment.InputType.T, getActivity());
+
+//                setTheSameOnChangeToSpinners(
+//                        profile_nameInput,
+//                        profile_typeSpinner,
+//                        profile_formatSpinner,
+//                        profile_statusSpinner,
+//                        profile_tournamentsSync,
+//                        getActivity(),
+//                        profile_tableLayout,
+//                        this,
+//                        TabFragmentType.TAB_2_FRAGMENT
+//                        );
+
+
+                try {
+                    profileImage.setImageBitmap(task.get());
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                layout.setVisibility(View.GONE);
+                layoutIfNotLoggedIn.setVisibility(View.VISIBLE);
+//                Intent loginActivity = new Intent(getActivity().getApplicationContext(), LoginActivity.class);
+//                startActivity(loginActivity);
+
+            }
             return view;
         }
+
+
+        private void tryLoadTournamentsByProfile(){
+
+        }
+
     }
 
 
@@ -495,6 +503,198 @@ public class MainActivity extends AppCompatActivity {
             finish();
             startActivity(getIntent());;
         }
+    }
+
+
+    public static void addItemsToSpinner(Spinner spinner, List<String> items, Tab1Fragment.InputType inputType, Activity activity) {
+        List<String> spinnerItems = new ArrayList<String>();
+        spinnerItems.add(inputType.toString());
+        spinnerItems.addAll(items);
+        ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(activity,
+                android.R.layout.simple_spinner_item, spinnerItems);
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(dataAdapter);
+    }
+
+    public static void setTheSameOnChangeToSpinners(final TextView nameInput,
+                                                    final Spinner typeSpinner,
+                                                    final Spinner formatSpinner,
+                                                    final Spinner statusSpinner,
+                                                    final Map<String, JSONObject> tournamentsSync,
+                                                    final Activity activity,
+                                                    final TableLayout tableLayout,
+                                                    Fragment fragment,
+                                                    TabFragmentType tabFragmentType
+                                                    ){
+        final Tab1Fragment tab1Fragment;
+        final Tab2Fragment tab2Fragment;
+        if (tabFragmentType.equals(TabFragmentType.TAB_1_FRAGMENT)) {
+            tab1Fragment = (Tab1Fragment) fragment;
+            tab2Fragment = null;
+        } else {
+            tab1Fragment = null;
+            tab2Fragment = (Tab2Fragment) fragment;
+        }
+        typeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+                try {
+                    clearTable(tableLayout);
+                    List<TableRowAndJsonObject> tableRowsAndJsonObjects = findTournamentsByInputsAndFillTable(nameInput, typeSpinner, formatSpinner, statusSpinner, tournamentsSync, activity, tableLayout);
+                    tab1Fragment.onRowClickForList(tableRowsAndJsonObjects);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+
+        statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+                try {
+                    clearTable(tableLayout);
+                    List<TableRowAndJsonObject> tableRowsAndJsonObjects = findTournamentsByInputsAndFillTable(nameInput, typeSpinner, formatSpinner, statusSpinner, tournamentsSync, activity, tableLayout);
+                    tab1Fragment.onRowClickForList(tableRowsAndJsonObjects);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+
+        formatSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // your code here
+                try {
+                    clearTable(tableLayout);
+                    List<TableRowAndJsonObject> tableRowsAndJsonObjects = findTournamentsByInputsAndFillTable(nameInput, typeSpinner, formatSpinner, statusSpinner, tournamentsSync, activity, tableLayout);
+                    tab1Fragment.onRowClickForList(tableRowsAndJsonObjects);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // your code here
+            }
+
+        });
+
+    }
+
+    private static void clearTable(TableLayout tableLayout){
+        tableLayout.removeViews(4,tableLayout.getChildCount()-4);
+    }
+
+
+    private static List<TableRowAndJsonObject> findTournamentsByInputsAndFillTable(TextView nameInput,
+                                                     Spinner typeSpinner,
+                                                     Spinner formatSpinner,
+                                                     Spinner statusSpinner,
+                                                     Map<String, JSONObject> tournamentsSync,
+                                                     Activity activity,
+                                                     TableLayout tableLayout
+                                                     ) throws JSONException, InterruptedException {
+        String name = nameInput.getText().toString();
+
+        String type = typeSpinner.getSelectedItem().toString();
+
+        switch (type) {
+            case "RR" : type = "Round Robin"; break;
+            case "SE" : type = "Single Elimination"; break;
+            case "DE" : type = "Double Elimination"; break;
+        }
+
+        String format = formatSpinner.getSelectedItem().toString();
+        String status = statusSpinner.getSelectedItem().toString();
+        List<TableRowAndJsonObject> tableRowsAndTournaments = new ArrayList<>();
+
+        for (String key : tournamentsSync.keySet()) {
+            if (tournamentsSync.get(key).get("Name").toString().toUpperCase().contains(name.toUpperCase())
+                    &&
+                    (tournamentsSync.get(key).get("Type__c").toString().equals(type) ||
+                            type.equals(Tab1Fragment.InputType.T.toString()))
+                    &&
+                    (tournamentsSync.get(key).get("Status__c").toString().equals(status) ||
+                            status.equals(Tab1Fragment.InputType.S.toString()))
+                    &&
+                    (tournamentsSync.get(key).get("Format__c").toString().equals(format) ||
+                            format.equals(Tab1Fragment.InputType.F.toString()))
+                    ) {
+                TableRow tableRow = addTableRow(tournamentsSync.get(key),activity, tournamentsSync, tableLayout);
+                TableRowAndJsonObject tableRowAndJsonObject = new TableRowAndJsonObject();
+                tableRowAndJsonObject.tableRow = tableRow;
+                tableRowAndJsonObject.tournament = tournamentsSync.get(key);
+                tableRowsAndTournaments.add(tableRowAndJsonObject);
+            }
+        }
+        return tableRowsAndTournaments;
+    }
+
+
+    private static TableRow addTableRow(JSONObject jsonObject, Activity activity, Map<String, JSONObject> tournamentsSync, TableLayout tableLayout) throws JSONException, InterruptedException {
+        TableRow tableRow = new TableRow(activity);
+        tableRow.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT));
+        tableRow.addView(makeColumn((String) jsonObject.get("Name"), activity),0);
+
+        TextView typeText = makeColumn((String) ""+jsonObject.get("Type__c").toString().split(" ")[0].charAt(0)+
+                jsonObject.get("Type__c").toString().split(" ")[1].charAt(0), activity);
+
+        tableRow.addView(typeText,1);
+        tableRow.addView(makeColumn((String) jsonObject.get("Format__c"), activity),2);
+        tableRow.addView(makeColumn((String) jsonObject.get("Status__c"), activity),3);
+        tableRow.setPadding(0,10,0,0);
+        tournamentsSync.put(jsonObject.get("Id").toString(), jsonObject);
+        tableLayout.addView(tableRow);
+        return tableRow;
+    }
+
+
+    private static TextView makeColumn(String text, Activity activity) {
+        TextView textView = new TextView(activity);
+        textView.setText(text);
+        textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
+        textView.setTextColor(Color.parseColor("#000000"));
+        textView.setPadding(10,10,0,0);
+        return textView;
+    }
+
+    static class TableRowAndJsonObject {
+        TableRow tableRow;
+        JSONObject tournament;
+
+        public TableRowAndJsonObject() {
+        }
+    }
+
+
+    enum TabFragmentType {
+        TAB_1_FRAGMENT,
+        TAB_2_FRAGMENT;
     }
 
 }

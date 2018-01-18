@@ -3,6 +3,8 @@ package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.support.v7.app.AlertDialog;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -148,7 +151,7 @@ public class Sf_Rest_Syncronizer {
                         if (jsonArray.length() > 0) {
                             setVersionNumber(jsonArray.getJSONObject(jsonArray.length()-1)
                                     .getString("version"));
-                            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c+from+Player__c");
+                            instance.getAllPlayersSync("SELECT+Id,Name,Email__c,Password__c,IsManager__c,Image__c+from+Player__c");
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -189,9 +192,22 @@ public class Sf_Rest_Syncronizer {
                                 JSONObject playerJson = jsonArray.getJSONObject(i);
                                 Player__c player = (Player__c) new Gson().fromJson(playerJson.toString(), Player__c.class);
                                 PlayerSession.allPlayersSync.put(player.Id, player);
+
+                                if (player.Image__c==null) {
+                                    PlayerSession.playerBitmaps.put(player.Id, null);
+                                } else {
+                                    AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask();
+                                    task.execute(player.Image__c);
+                                    while (task.get() == null) {}
+                                    PlayerSession.playerBitmaps.put(player.Id, task.get());
+                                }
                             }
                         }
                     } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (ExecutionException e) {
                         e.printStackTrace();
                     }
                 }

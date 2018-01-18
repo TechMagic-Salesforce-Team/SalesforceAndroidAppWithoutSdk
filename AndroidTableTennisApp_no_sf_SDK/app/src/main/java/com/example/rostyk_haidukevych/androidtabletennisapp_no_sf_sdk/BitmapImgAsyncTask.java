@@ -47,7 +47,6 @@ public class BitmapImgAsyncTask extends AsyncTask<String, Void, Bitmap> {
     protected void onPostExecute(Bitmap bitmap) {
         if (bitmap != null) {
             //mListener.onImageLoaded(bitmap);
-
         } else {
 
             //mListener.onError();

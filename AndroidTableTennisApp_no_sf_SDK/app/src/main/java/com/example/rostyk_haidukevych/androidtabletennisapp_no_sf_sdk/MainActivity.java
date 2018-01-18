@@ -1,6 +1,7 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -29,6 +30,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
@@ -37,6 +39,7 @@ import android.widget.TextView;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.TournamentSession;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Tournament__c;
 import com.google.gson.Gson;
 
@@ -74,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private static Sf_Rest_Syncronizer restSyncronizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(mViewPager);
 
         Sf_Rest_Syncronizer.currentActivity = this;
-        Sf_Rest_Syncronizer sf_rest_syncronizer = Sf_Rest_Syncronizer.getInstance();
+        restSyncronizer = Sf_Rest_Syncronizer.getInstance();
 
         Button loginLogoutButton = findViewById(R.id.login_logout_button);;
 
@@ -248,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void tryLoadTournaments() {
-            if (Sf_Rest_Syncronizer.getInstance().getAuthSettings() != null && Sf_Rest_Syncronizer.getInstance().getVersionNumber() != null) {
+            if (restSyncronizer.getAuthSettings() != null && restSyncronizer.getVersionNumber() != null) {
                 loadAllTournamentsToTheTable("SELECT+Id,Name,Status__c,Format__c,Type__c+" +
                         "from+Tournament__c");
             } else {
@@ -275,12 +279,12 @@ public class MainActivity extends AppCompatActivity {
             tournamentsSync.clear();
             clearTable(tableLayout);
             OkHttpClient client = new OkHttpClient();
-            String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
-                    "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
+            String url = restSyncronizer.getAuthSettings().getInstance_url() +
+                    "/services/data/v" + restSyncronizer.getVersionNumber() + "/query?q="
                     + soql;
             final Request request = new Request.Builder()
                     .url(url).addHeader("Accept", "application/json")
-                    .addHeader("Authorization", "Bearer "+ Sf_Rest_Syncronizer.getInstance().getACCESS_TOKEN())
+                    .addHeader("Authorization", "Bearer "+ restSyncronizer.getACCESS_TOKEN())
                     .build();
 
             client.newCall(request).enqueue(new Callback() {
@@ -482,12 +486,12 @@ public class MainActivity extends AppCompatActivity {
 
         private void tryLoadTournamentsByProfile(){
             OkHttpClient client = new OkHttpClient();
-            String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url()
+            String url = restSyncronizer.getAuthSettings().getInstance_url()
                     +"/services/apexrest/api/get/tournaments/player?playerId="
                     + PlayerSession.currentPlayer.Id;
             Request request = new Request.Builder().url(url)
                     .addHeader("Authorization","Bearer "
-                            +Sf_Rest_Syncronizer.getInstance().getAuthSettings().getAccess_token())
+                            +restSyncronizer.getAuthSettings().getAccess_token())
                     .addHeader("Accept", "application/json")
                     .build();
 
@@ -554,6 +558,78 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
+    public static class Tab3Fragment extends Fragment {
+        private TableLayout playersTable;
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View view =  inflater.inflate(R.layout.tab3_fragment, container, false);
+
+            while (view == null || PlayerSession.allPlayersSync == null || PlayerSession.playerBitmaps.size() < 27) {
+//                try {
+//                    Thread.sleep(1000);
+//                    onCreateView(inflater, container, savedInstanceState);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+            }
+
+            playersTable = view.findViewById(R.id.players_table);
+            int counter = 0;
+
+            if (PlayerSession.allPlayersSync != null) {
+                for (Player__c player : PlayerSession.allPlayersSync.values()) {
+                    //if (counter >= 10) break;
+                    addTableRow(player);
+                    counter++;
+                    System.out.println("counter : " + counter);
+                }
+            }
+
+            System.out.println("Children count: "+playersTable.getChildCount());
+            return view;
+        }
+
+
+        private void addTableRow(Player__c player){
+            TableRow tableRow = new TableRow(getActivity());
+            //final String DEFAULT_IMAGE_ADDRESS = "https://cdn3.iconfinder.com/data/icons/rcons-user-action/32/boy-512.png";
+
+            int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    150,
+                    getResources().getDisplayMetrics());
+            int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                    120,
+                    getResources().getDisplayMetrics());
+
+            TableRow.LayoutParams lp = new TableRow.LayoutParams(width, height);
+            lp.setMargins(0,10,0,0);
+
+
+            ImageView imageView = new ImageView(getActivity());
+            imageView.setImageResource(R.drawable.all_players);
+            imageView.setScaleType(ImageView.ScaleType.FIT_START);
+            imageView.setLayoutParams(lp);
+
+            if (PlayerSession.playerBitmaps.get(player.Id)==null)
+                imageView.setImageResource(R.drawable.default_player);
+            else {
+                imageView.setImageBitmap(PlayerSession.playerBitmaps.get(player.Id));
+            }
+            //while (!currentTask.getStatus().equals(AsyncTask.Status.FINISHED)) {}
+
+            tableRow.addView(imageView);
+            TextView textView = new TextView(getActivity());
+            textView.setText("\n\n     " + player.Name);
+            textView.setTextSize(15);
+            tableRow.addView(textView);
+            playersTable.addView(tableRow);
+        }
+
+    }
+
+
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
@@ -595,6 +671,7 @@ public class MainActivity extends AppCompatActivity {
         SectionsPageAdapter adapter = new SectionsPageAdapter(getSupportFragmentManager());
         adapter.addFragment(new Tab1Fragment(), "Home");
         adapter.addFragment(new Tab2Fragment(), "Profile");
+        adapter.addFragment(new Tab3Fragment(), "Players");
         viewPager.setAdapter(adapter);
     }
 
@@ -810,8 +887,7 @@ public class MainActivity extends AppCompatActivity {
         TableRow tableRow;
         JSONObject tournament;
 
-        public TableRowAndJsonObject() {
-        }
+        public TableRowAndJsonObject() {}
     }
 
 

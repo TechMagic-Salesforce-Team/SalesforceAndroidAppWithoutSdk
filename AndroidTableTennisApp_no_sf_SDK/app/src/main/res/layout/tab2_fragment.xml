@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent">
-        <include layout="@layout/profile" android:visibility="gone"/>
-        <include layout="@layout/layout_if_not_logged_in" android:visibility="visible"/>
+        <include layout="@layout/profile" android:visibility="visible"/>
+        <include layout="@layout/layout_if_not_logged_in" android:visibility="gone"/>
 </RelativeLayout>

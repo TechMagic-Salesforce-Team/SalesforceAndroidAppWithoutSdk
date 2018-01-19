@@ -33,6 +33,11 @@
         <activity
             android:name=".GamesListActivity"
             android:label="Tournament info"></activity>
+
+        <activity android:name=".PlayerProfileActivity"
+            android:label="Player profile activity">
+        </activity>
+
     </application>
 
 </manifest>

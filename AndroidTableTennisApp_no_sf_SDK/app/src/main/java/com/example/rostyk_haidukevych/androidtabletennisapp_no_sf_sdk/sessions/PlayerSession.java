@@ -16,6 +16,7 @@ import java.util.Map;
 
 public class PlayerSession {
     public static Player__c currentPlayer = null;
+    public static Player__c playerSelected = null;
     public static Map<String, Player__c> allPlayersSync = new HashMap<>();
     public static Map<String, Bitmap> playerBitmaps = new HashMap<>();
 }

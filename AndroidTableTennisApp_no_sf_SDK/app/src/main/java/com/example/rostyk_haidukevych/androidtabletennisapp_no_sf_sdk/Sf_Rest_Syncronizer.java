@@ -50,6 +50,7 @@ public class Sf_Rest_Syncronizer {
 
     private static Sf_Rest_Syncronizer instance = null;
 
+    public static Integer playersSyncCount = null;
 
     private Sf_Rest_Syncronizer(){}
 
@@ -187,29 +188,33 @@ public class Sf_Rest_Syncronizer {
                 public void onResponse(Call call, Response response) throws IOException {
                     try {
                         JSONArray jsonArray = new JSONObject(response.body().string()).getJSONArray("records");
+                        playersSyncCount = jsonArray.length();
                         if (jsonArray.length() > 0) {
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 JSONObject playerJson = jsonArray.getJSONObject(i);
                                 Player__c player = (Player__c) new Gson().fromJson(playerJson.toString(), Player__c.class);
                                 PlayerSession.allPlayersSync.put(player.Id, player);
-
-                                if (player.Image__c==null) {
-                                    PlayerSession.playerBitmaps.put(player.Id, null);
-                                } else {
-                                    AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask();
-                                    task.execute(player.Image__c);
-                                    while (task.get() == null) {}
-                                    PlayerSession.playerBitmaps.put(player.Id, task.get());
-                                }
+                                PlayerSession.playerBitmaps.put(player.Id, null);
+//                                if (player.Image__c==null) {
+//                                    PlayerSession.playerBitmaps.put(player.Id, null);
+//                                } else {
+//                                    AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask();
+//                                    task.execute(player.Image__c);
+//                                    //while (task.get() == null) {}
+//                                    PlayerSession.playerBitmaps.put(player.Id, task.get());
+//                                }
                             }
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
+                    } catch (Exception ex) {
+
                     }
+//                    catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    } catch (ExecutionException e) {
+//                        e.printStackTrace();
+//                    }
                 }
             });
         } catch (Exception e) {

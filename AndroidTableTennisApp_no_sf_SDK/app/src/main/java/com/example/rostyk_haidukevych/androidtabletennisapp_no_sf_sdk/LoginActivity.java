@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -42,6 +43,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -264,7 +266,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         PlayerSession.currentPlayer.Image__c = currentPlayer.getString("Image__c");
                         PlayerSession.currentPlayer.role = currentPlayer.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
-
                         Intent mainActivity = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(mainActivity);
                     } else {

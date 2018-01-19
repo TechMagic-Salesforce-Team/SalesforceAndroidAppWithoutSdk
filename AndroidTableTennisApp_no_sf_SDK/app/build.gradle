@@ -33,5 +33,6 @@ dependencies {
     implementation files('libs/android-activation-1.6.0.jar')
     implementation files('libs/additionnal.jar')
     implementation files('libs/mail.jar')
+    implementation files('libs/picasso-2.5.2.jar')
 }
 

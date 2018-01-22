@@ -11,12 +11,14 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TableLayout;
+import android.widget.TextView;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.R;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
 
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class PlayerProfileActivity extends Activity {
     private EditText profile_nameInput;
     private TableLayout profile_tableLayout;
     private Map<String, JSONObject> profile_tournamentsSync = new HashMap<>();
+    private TextView nameField;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,7 +51,8 @@ public class PlayerProfileActivity extends Activity {
         profile_formatSpinner = findViewById(R.id.format_profile_tournament_input);
         profile_typeSpinner = findViewById(R.id.type_profile_tournament_input);
         profile_nameInput = findViewById(R.id.name_profile_tournament_input);
-
+        nameField = findViewById(R.id.player_name);
+        nameField.setText("Name: "+playerSelected.Name);
 
         if (playerSelected.Image__c==null) {
             PlayerSession.playerBitmaps.put(playerSelected.Id, null);

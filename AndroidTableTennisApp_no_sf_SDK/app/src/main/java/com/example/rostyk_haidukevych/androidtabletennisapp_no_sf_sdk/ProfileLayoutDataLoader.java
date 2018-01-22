@@ -66,6 +66,7 @@ public class ProfileLayoutDataLoader {
     private Player__c player;
     private RelativeLayout layout;
     private RelativeLayout layoutIfNotLoggedIn;
+    private TextView nameField;
 
     public ProfileLayoutDataLoader(ImageView profileImage,
                                    Spinner profile_statusSpinner,
@@ -139,6 +140,7 @@ public class ProfileLayoutDataLoader {
                     tryLoadTournamentsByProfile();
                 }
             });
+            tryLoadTournamentsByProfile();
         } else {
             syncButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -148,8 +150,8 @@ public class ProfileLayoutDataLoader {
                     tryLoadTournaments();
                 }
             });
+            tryLoadTournaments();
         }
-        tryLoadTournamentsByProfile();
     }
 
     public static void addItemsToSpinner(Spinner spinner, List<String> items, MainActivity.Tab1Fragment.InputType inputType, Activity activity) {
@@ -428,6 +430,7 @@ public class ProfileLayoutDataLoader {
                             for (int i = 0; i < tournaments.length(); i++) {
                                 JSONObject tournament = tournaments.getJSONObject(i);
                                 profile_tournamentsSync.put(tournament.getString("Id"), tournament);
+                                TournamentSession.allTournamentsSync.put(tournament.getString("Id"), new Gson().fromJson(tournament.toString(), Tournament__c.class));
                                 TableRow newTableRow = addTableRow(tournament);
                                 setOnRowClick(activity.getApplicationContext(), newTableRow, tournament);
                             }
@@ -457,6 +460,5 @@ public class ProfileLayoutDataLoader {
             }
         }
     }
-
 
 }

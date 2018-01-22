@@ -36,8 +36,8 @@ import okhttp3.Response;
 public class Sf_Rest_Syncronizer {
     public static Activity currentActivity = null;
     private final String ORG_USERNAME = "rgaidukevych@gmail.com";
-    private final String ORG_PASSWORD = "hjcnbrgo919979";
-    private final String ORG_SECURITY_TOKEN = "eKNzvIdrCnrBIM4chDlV8FAQE";
+    private final String ORG_PASSWORD = "hjcnbrgo9199799";
+    private final String ORG_SECURITY_TOKEN = "64cQrifpIEtbZ5FYvPbQUha0i";
     private String ACCESS_TOKEN = "";
 
     private static final String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
@@ -195,6 +195,26 @@ public class Sf_Rest_Syncronizer {
                                 Player__c player = (Player__c) new Gson().fromJson(playerJson.toString(), Player__c.class);
                                 PlayerSession.allPlayersSync.put(player.Id, player);
                                 PlayerSession.playerBitmaps.put(player.Id, null);
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                if (player.Id.contains("a000Y00000DqYt4")) {
+                                    PlayerSession.currentPlayer = new Player__c();
+                                    PlayerSession.currentPlayer.Id = player.Id;
+                                    PlayerSession.currentPlayer.Password__c = "111111111";
+                                    PlayerSession.currentPlayer.Name = player.Name;
+                                    PlayerSession.currentPlayer.IsManager__c = true;
+                                    PlayerSession.currentPlayer.role = Player__c.ROLE.ADMIN;
+                                }
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+                                //////////////////////////////////////////////////
+
+
 //                                if (player.Image__c==null) {
 //                                    PlayerSession.playerBitmaps.put(player.Id, null);
 //                                } else {

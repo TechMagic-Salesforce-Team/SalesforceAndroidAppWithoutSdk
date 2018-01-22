@@ -69,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
      * may be best to switch to a
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
-    private SectionsPageAdapter mSectionsPagerAdapter;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -86,16 +85,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPageAdapter(getSupportFragmentManager());
+
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
-        mViewPager.setOffscreenPageLimit(2);
-        //mViewPager.setAdapter(mSectionsPagerAdapter);
-        setupViewPager(mViewPager);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(mViewPager);
 
 //        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
 //            @Override
@@ -118,6 +111,15 @@ public class MainActivity extends AppCompatActivity {
 
         Sf_Rest_Syncronizer.currentActivity = this;
         restSyncronizer = Sf_Rest_Syncronizer.getInstance();
+
+        while (Sf_Rest_Syncronizer.playersSyncCount == null || Sf_Rest_Syncronizer.playersSyncCount > PlayerSession.allPlayersSync.size()) {}
+
+        mViewPager = (ViewPager) findViewById(R.id.container);
+        mViewPager.setOffscreenPageLimit(2);
+        setupViewPager(mViewPager);
+
+        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        tabLayout.setupWithViewPager(mViewPager);
 
         Button loginLogoutButton = findViewById(R.id.login_logout_button);;
 
@@ -165,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
         private Spinner typeSpinner;
         private EditText nameInput;
         private TableLayout tableLayout;
-        private Map<String, JSONObject> tournamentsSync = new HashMap<>();
 
         public Tab1Fragment() {}
 
@@ -290,7 +291,7 @@ public class MainActivity extends AppCompatActivity {
         private EditText profile_nameInput;
         private TableLayout profile_tableLayout;
         private Map<String, JSONObject> profile_tournamentsSync = new HashMap<>();
-
+        private TextView nameField;
         public Tab2Fragment() {}
 
 
@@ -309,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
+            nameField = view.findViewById(R.id.player_name);
             profileImage = view.findViewById(R.id.profile_image);
             RelativeLayout layout = view.findViewById(R.id.profile_layout);
             RelativeLayout layoutIfNotLoggedIn = view.findViewById(R.id.layout_no_user);
@@ -318,7 +320,8 @@ public class MainActivity extends AppCompatActivity {
             if (PlayerSession.currentPlayer != null) {
                 layout.setVisibility(View.VISIBLE);
                 layoutIfNotLoggedIn.setVisibility(View.GONE);
-
+                nameField.setVisibility(View.VISIBLE);
+                nameField.setText("Name: "+PlayerSession.currentPlayer.Name);
 
                 String IMAGE_URL = PlayerSession.currentPlayer.Image__c;
 
@@ -398,6 +401,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 layout.setVisibility(View.GONE);
                 layoutIfNotLoggedIn.setVisibility(View.VISIBLE);
+                nameField.setVisibility(View.GONE);
             }
             return view;
         }
@@ -493,12 +497,142 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public static class Tab4Fragment extends Fragment {
+        private ViewPager viewPager;
+        @Nullable
+        @Override
+        public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+            View view = inflater.inflate(R.layout.tab4_fragment, container, false);
+
+            if (view == null) {
+                try {
+                    Thread.sleep(1000);
+                    onCreateView(inflater, container, savedInstanceState);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            viewPager = (ViewPager) view.findViewById(R.id.admin_container);
+            viewPager.setOffscreenPageLimit(2);
+            setupViewPagerForAdminTab(viewPager);
+
+
+
+
+
+            TabLayout tabLayout = (TabLayout) view.findViewById(R.id.admin_tabs);
+            tabLayout.setupWithViewPager(viewPager);
+
+            return view;
+        }
+
+
+        private void setupViewPagerForAdminTab(ViewPager viewPager) {
+            SectionsPageAdapter adapter = new SectionsPageAdapter(getChildFragmentManager());
+            adapter.addFragment(new AdminPlayersFragment(), "Players");
+            adapter.addFragment(new AdminTournamentsFragment(), "Tournaments");
+            viewPager.setAdapter(adapter);
+        }
+
+
+        public static class AdminPlayersFragment extends Fragment {
+
+            @Nullable
+            @Override
+            public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                View view = inflater.inflate(R.layout.players_admin_fragment, container, false);
+
+
+
+                return view;
+            }
+
+        }
+
+        public static class AdminTournamentsFragment extends Fragment {
+            private TableLayout tableLayout;
+
+            @Nullable
+            @Override
+            public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+                View view = inflater.inflate(R.layout.tournaments_admin_fragment, container, false);
+                tableLayout = view.findViewById(R.id.admin_layout_tournaments_table);
+
+                for (Tournament__c tournament : TournamentSession.allTournamentsSync.values()) {
+                    if (tournament.Status__c.equals("Upcoming")) {
+                        addTableRow(tournament);
+                    }
+                }
+                return view;
+            }
+
+
+            private void addTableRow(Tournament__c tournament){
+                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        40, getActivity().getResources().getDisplayMetrics());
+
+                TableLayout.LayoutParams lp = new TableLayout.LayoutParams
+                        (TableLayout.LayoutParams.WRAP_CONTENT, height);
+                lp.setMargins(0,20,0,0);
+                TableRow tableRow = new TableRow(getActivity());
+                tableRow.setLayoutParams(lp);
+                tableRow.addView(makeColumn(tournament.Name, getActivity()));
+                String type = ""+tournament.Type__c.split(" ")[0].charAt(0)
+                        +tournament.Type__c.split(" ")[1].charAt(0);
+                tableRow.addView(makeColumn(type, getActivity()));
+                tableRow.addView(makeColumn(tournament.Format__c, getActivity()));
+                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.START, getActivity()));
+                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.DELETE, getActivity()));
+                tableLayout.addView(tableRow);
+            }
+
+            private static TextView makeColumn(String text, Activity activity) {
+                TextView textView = new TextView(activity);
+                textView.setText(text);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,20);
+                textView.setTextColor(Color.parseColor("#000000"));
+                textView.setPadding(10,10,0,0);
+                return textView;
+            }
+
+            private static TextView makeButtonColumn(String tournamentId, ButtonType type, Activity activity) {
+                int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        40, activity.getResources().getDisplayMetrics());
+
+                int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                        80, activity.getResources().getDisplayMetrics());
+
+
+                TableRow.LayoutParams layoutParams = new TableRow.LayoutParams
+                        (width, height);
+                layoutParams.setMargins(10,0,0,0);
+                Button button = new Button(activity);
+                button.setLayoutParams(layoutParams);
+                button.setText(type.toString());
+                button.setTextSize(TypedValue.COMPLEX_UNIT_DIP,12);
+                button.setTextColor(Color.WHITE);
+                button.setBackgroundResource
+                        (type == ButtonType.START ? R.color.sf__start_button : R.color.sf__warning_color);
+                return button;
+            }
+
+            enum ButtonType {
+                START,DELETE
+            }
+
+        }
+
+
+
+    }
+
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPageAdapter extends FragmentPagerAdapter {
+    public static class SectionsPageAdapter extends FragmentPagerAdapter {
 
         private final List<Fragment> mFragmentList = new ArrayList<>();
         private final List<String> mFragmentTitleList = new ArrayList<>();
@@ -536,8 +670,12 @@ public class MainActivity extends AppCompatActivity {
         adapter.addFragment(new Tab1Fragment(), "Home");
         adapter.addFragment(new Tab2Fragment(), "Profile");
         adapter.addFragment(new Tab3Fragment(), "Players");
+        if (PlayerSession.currentPlayer != null && PlayerSession.currentPlayer.IsManager__c) {
+            adapter.addFragment(new Tab4Fragment(), "Admin");
+        }
         viewPager.setAdapter(adapter);
     }
+
 
     public void onLoginLogoutClick(View v) {
         System.out.println("btn access token clicked: "+Sf_Rest_Syncronizer.getInstance().

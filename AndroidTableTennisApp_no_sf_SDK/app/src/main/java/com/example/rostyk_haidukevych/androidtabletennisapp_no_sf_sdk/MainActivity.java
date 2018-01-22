@@ -568,9 +568,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
+
+
                 System.out.println("Fragment AdminTournamentsFragment was created"+TournamentSession.allTournamentsSync.get("a010Y00000YXbJPQA1").Status__c);
 
                 tableLayout = view.findViewById(R.id.admin_layout_tournaments_table);
+                System.out.println("Size: "+tableLayout.getChildCount());
 
                 for (Tournament__c tournament : TournamentSession.allTournamentsSync.values()) {
                     if (tournament.Status__c.equals("Upcoming")) {

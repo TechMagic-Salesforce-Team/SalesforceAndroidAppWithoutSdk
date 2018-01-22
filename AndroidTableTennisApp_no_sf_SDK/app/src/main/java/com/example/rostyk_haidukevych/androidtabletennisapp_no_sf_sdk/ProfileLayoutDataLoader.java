@@ -117,7 +117,7 @@ public class ProfileLayoutDataLoader {
                     List<MainActivity.TableRowAndJsonObject> tableRowAndJsonObjects =
                             findTournamentsByInputsAndFillTable();
                     for (MainActivity.TableRowAndJsonObject obj : tableRowAndJsonObjects) {
-                        setOnRowClick(activity.getApplicationContext(), obj.tableRow, obj.tournament);
+                        setOnRowClick(activity, obj.tableRow, obj.tournament);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -319,14 +319,14 @@ public class ProfileLayoutDataLoader {
     }
 
 
-    private void setOnRowClick(final Context context, TableRow row, final JSONObject tournament){
+    private void setOnRowClick(final Activity activity, TableRow row, final JSONObject tournament){
         row.setClickable(true);  //allows you to select a specific row
         row.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 TournamentSession.tournamentSelected = (Tournament__c)
                         new Gson().fromJson(String.valueOf(tournament), Tournament__c.class);
-                Intent tournamentInfoActivity = new Intent(context, GamesListActivity.class);
-                context.startActivity(tournamentInfoActivity);
+                Intent tournamentInfoActivity = new Intent(activity, GamesListActivity.class);
+                activity.startActivity(tournamentInfoActivity);
             }
         });
     }
@@ -371,7 +371,7 @@ public class ProfileLayoutDataLoader {
                                 JSONObject tournamentJSON = tournamentsJSON.getJSONObject(i);
                                 TableRow tableRow = addTableRow(
                                         tournamentJSON);
-                                setOnRowClick(activity.getApplicationContext(), tableRow, tournamentJSON);
+                                setOnRowClick(activity, tableRow, tournamentJSON);
                             }
 
                         } catch (JSONException e) {
@@ -388,7 +388,7 @@ public class ProfileLayoutDataLoader {
 
     public void onRowClickForList(List<MainActivity.TableRowAndJsonObject> tableRowsAndJsonObjects) {
         for (MainActivity.TableRowAndJsonObject tableRowAndJsonObject : tableRowsAndJsonObjects) {
-            setOnRowClick(activity.getApplicationContext(), tableRowAndJsonObject.tableRow, tableRowAndJsonObject.tournament);
+            setOnRowClick(activity, tableRowAndJsonObject.tableRow, tableRowAndJsonObject.tournament);
         }
     }
 
@@ -432,7 +432,7 @@ public class ProfileLayoutDataLoader {
                                 profile_tournamentsSync.put(tournament.getString("Id"), tournament);
                                 TournamentSession.allTournamentsSync.put(tournament.getString("Id"), new Gson().fromJson(tournament.toString(), Tournament__c.class));
                                 TableRow newTableRow = addTableRow(tournament);
-                                setOnRowClick(activity.getApplicationContext(), newTableRow, tournament);
+                                setOnRowClick(activity, newTableRow, tournament);
                             }
                         } catch (JSONException e) {
                             e.printStackTrace();

@@ -229,7 +229,6 @@ public class Sf_Rest_Syncronizer {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } catch (Exception ex) {
-
                     }
 //                    catch (InterruptedException e) {
 //                        e.printStackTrace();

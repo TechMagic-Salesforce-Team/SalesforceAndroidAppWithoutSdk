@@ -434,7 +434,6 @@ public class ProfileLayoutDataLoader {
                                 TableRow newTableRow = addTableRow(tournament);
                                 setOnRowClick(activity.getApplicationContext(), newTableRow, tournament);
                             }
-
                         } catch (JSONException e) {
                             e.printStackTrace();
                         } catch (InterruptedException e) {

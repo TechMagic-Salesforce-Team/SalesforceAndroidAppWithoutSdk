@@ -41,6 +41,7 @@ public class Sf_Rest_Syncronizer {
     private String ACCESS_TOKEN = "";
 
     private static final String LOGIN_URL = "https://login.salesforce.com/services/oauth2/token";
+
     private static final String CLIENT_ID =
             "3MVG9HxRZv05HarQDQcBkT_chF.RWVZHSA8FLCkfvwl8OYnEHdvQFtc3lBrlRYzmIRPqz5qzTqPMUUJq1q.xz";
     private static final String CLIENT_SECRET = "6823072746201649040";
@@ -264,6 +265,10 @@ public class Sf_Rest_Syncronizer {
 
     public String getACCESS_TOKEN() {
         return ACCESS_TOKEN;
+    }
+
+    public String getClientId() {
+        return CLIENT_ID;
     }
 
 

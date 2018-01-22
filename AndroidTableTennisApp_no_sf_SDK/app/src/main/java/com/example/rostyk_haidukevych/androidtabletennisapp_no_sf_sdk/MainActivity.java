@@ -1,7 +1,9 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -55,8 +57,10 @@ import java.util.concurrent.ExecutionException;
 
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
@@ -542,21 +546,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
                 View view = inflater.inflate(R.layout.players_admin_fragment, container, false);
-
-
-
                 return view;
             }
 
         }
 
         public static class AdminTournamentsFragment extends Fragment {
-            private TableLayout tableLayout;
+            private static TableLayout tableLayout;
 
             @Nullable
             @Override
             public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
                 View view = inflater.inflate(R.layout.tournaments_admin_fragment, container, false);
+
+                if (view==null) {
+                    try {
+                        Thread.sleep(1000);
+                        onCreateView(inflater,container,savedInstanceState);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                System.out.println("Fragment AdminTournamentsFragment was created"+TournamentSession.allTournamentsSync.get("a010Y00000YXbJPQA1").Status__c);
+
                 tableLayout = view.findViewById(R.id.admin_layout_tournaments_table);
 
                 for (Tournament__c tournament : TournamentSession.allTournamentsSync.values()) {
@@ -582,8 +595,8 @@ public class MainActivity extends AppCompatActivity {
                         +tournament.Type__c.split(" ")[1].charAt(0);
                 tableRow.addView(makeColumn(type, getActivity()));
                 tableRow.addView(makeColumn(tournament.Format__c, getActivity()));
-                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.START, getActivity()));
-                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.DELETE, getActivity()));
+                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.START, getActivity(), tableRow));
+                tableRow.addView(makeButtonColumn(tournament.Id, ButtonType.DELETE, getActivity(), tableRow));
                 tableLayout.addView(tableRow);
             }
 
@@ -596,9 +609,9 @@ public class MainActivity extends AppCompatActivity {
                 return textView;
             }
 
-            private static TextView makeButtonColumn(String tournamentId, ButtonType type, Activity activity) {
+            private static TextView makeButtonColumn(final String tournamentId, ButtonType type, final Activity activity, final TableRow tableRow) {
                 int height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
-                        40, activity.getResources().getDisplayMetrics());
+                        35, activity.getResources().getDisplayMetrics());
 
                 int width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
                         80, activity.getResources().getDisplayMetrics());
@@ -610,10 +623,97 @@ public class MainActivity extends AppCompatActivity {
                 Button button = new Button(activity);
                 button.setLayoutParams(layoutParams);
                 button.setText(type.toString());
-                button.setTextSize(TypedValue.COMPLEX_UNIT_DIP,12);
+                button.setTextSize(TypedValue.COMPLEX_UNIT_DIP,10);
                 button.setTextColor(Color.WHITE);
                 button.setBackgroundResource
                         (type == ButtonType.START ? R.color.sf__start_button : R.color.sf__warning_color);
+
+                if (type.equals(ButtonType.START)) {
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            System.out.println("Start tournament "+tournamentId);
+                            OkHttpClient client = new OkHttpClient();
+                            Sf_Rest_Syncronizer restSyncronizer = Sf_Rest_Syncronizer.getInstance();
+                            MediaType Encoded = MediaType.parse("application/json");
+                            RequestBody body = RequestBody.create(Encoded,
+                                    "{\"tournamentId\":\""+tournamentId+"\"}");
+                            final Request request =
+                                    new Request.Builder()
+                                            .url(restSyncronizer.getAuthSettings().getInstance_url()
+                                                    +"/services/apexrest/api/post/tournaments/start"
+                                                    )
+                                            .addHeader("Content-Type", "application/json")
+                                            .addHeader("From", restSyncronizer.getClientId())
+                                            .addHeader("Authorization", "Bearer "
+                                                    + restSyncronizer.getAuthSettings().getAccess_token()
+                                            )
+                                            .post(body)
+                                            .build();
+
+                            client.newCall(request).enqueue(new Callback() {
+                                @Override
+                                public void onFailure(Call call, IOException e) {
+                                    System.out.println("Error while trying to start tournament "+e.getMessage());
+                                }
+
+                                @Override
+                                public void onResponse(Call call, final Response response) throws IOException {
+                                    final String[] responseBody = {response.body().string()};
+                                    System.out.println("Response body (after trying to start tournament) => "+ responseBody[0]);
+                                    activity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (response.code()==200) {
+                                                responseBody[0] = responseBody[0].substring(1, responseBody[0].length()-1);
+                                                try {
+                                                    System.out.println("rb: "+ responseBody[0]);
+                                                    System.out.println("Code == 200");
+                                                    JSONObject jsonObject = new JSONObject(responseBody[0]);
+                                                    //if (jsonObject.get("status")=="Current") {
+                                                        tableLayout.removeView(tableRow);
+                                                    System.out.println("Children count (before childAt) : "+tableLayout.getChildCount());
+                                                        if (tableLayout.getChildCount()==1) {
+                                                            tableLayout.removeView(tableLayout.getChildAt(0));
+                                                        }
+//                                                    Tournament__c tournament__c = TournamentSession.allTournamentsSync.get(tournamentId);
+//                                                        tournament__c.Status__c = "Current";
+//                                                    TournamentSession.allTournamentsSync.put(tournamentId, tournament__c);
+                                                    //}
+                                                    AlertDialog.Builder dialog = new AlertDialog.Builder(activity);
+                                                    dialog.setCancelable(false);
+                                                    dialog.setTitle("Congratulations");
+                                                    dialog.setMessage("Tournament '"+
+                                                            TournamentSession.allTournamentsSync.get(tournamentId).Name+"' has been started");
+                                                    dialog.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int id) {
+                                                            Intent intent = new Intent(activity.getApplicationContext(), MainActivity.class);
+                                                            activity.startActivity(intent);
+                                                            dialog.cancel();
+                                                        }
+                                                    });
+                                                    dialog.show();
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
+                                        }
+                                    });
+
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            System.out.println("Start tournament "+tournamentId);
+                        }
+                    });
+                }
+
                 return button;
             }
 
@@ -717,7 +817,6 @@ public class MainActivity extends AppCompatActivity {
 
         public TableRowAndJsonObject() {}
     }
-
 
     enum TabFragmentType {
         TAB_1_FRAGMENT,

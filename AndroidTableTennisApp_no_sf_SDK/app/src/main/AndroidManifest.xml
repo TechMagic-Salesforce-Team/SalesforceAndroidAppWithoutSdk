@@ -38,6 +38,11 @@
             android:label="Player profile activity">
         </activity>
 
+
+        <activity android:name=".CreateTournamentActivity"
+            android:label="Create tournaments">
+        </activity>
+
     </application>
 
 </manifest>

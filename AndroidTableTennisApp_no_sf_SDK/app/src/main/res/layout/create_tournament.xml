@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        >
+    <EditText
+        android:id="@+id/name_tournament_create"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="17dp"
+        android:hint="Name"
+        android:maxLength="14" />
+
+    <Spinner
+        android:id="@+id/type_tournament_create"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/name_tournament_create"
+        android:layout_below="@+id/name_tournament_create"
+        android:layout_marginTop="15dp">
+    </Spinner>
+
+
+    <Spinner
+        android:id="@+id/format_tournament_create"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/type_tournament_create"
+        android:layout_below="@+id/type_tournament_create"
+        android:layout_marginTop="15dp">
+    </Spinner>
+
+
+    <Spinner
+        android:id="@+id/status_tournament_create"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/format_tournament_create"
+        android:layout_below="@+id/format_tournament_create"
+        android:layout_marginTop="15dp">
+    </Spinner>
+
+
+    <Button
+        android:id="@+id/create_tournament_button_post"
+        android:layout_width="200dp"
+        android:layout_height="wrap_content"
+        android:layout_alignStart="@+id/status_tournament_create"
+        android:layout_below="@+id/status_tournament_create"
+        android:layout_marginTop="17dp"
+        android:background="@color/sf__blue"
+        android:textColor="@color/sf_white"
+        android:text="Create"
+        />
+    </RelativeLayout>
+</RelativeLayout>

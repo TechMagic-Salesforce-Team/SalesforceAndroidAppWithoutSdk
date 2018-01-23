@@ -580,6 +580,16 @@ public class MainActivity extends AppCompatActivity {
                         addTableRow(tournament);
                     }
                 }
+
+                Button createTournamentBtn = view.findViewById(R.id.create_tournament_button);
+                createTournamentBtn.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent createTournamentActivity = new Intent(getActivity(), CreateTournamentActivity.class);
+                        startActivity(createTournamentActivity);
+                    }
+                });
+
                 return view;
             }
 
@@ -720,12 +730,12 @@ public class MainActivity extends AppCompatActivity {
                 return button;
             }
 
+
             enum ButtonType {
                 START,DELETE
             }
 
         }
-
 
 
     }

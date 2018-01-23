@@ -12,6 +12,7 @@
         android:id="@+id/create_tournament"
         android:orientation="vertical"
         android:layout_marginTop="15dp"
+        android:layout_centerHorizontal="true"
         >
 
         <Button
@@ -22,6 +23,8 @@
             android:text="Create tournament"
             android:textColor="@color/sf_white"
             android:textSize="12dp"
+            android:paddingEnd="20dp"
+            android:paddingStart="20dp"
             android:id="@+id/create_tournament_button"
             />
 

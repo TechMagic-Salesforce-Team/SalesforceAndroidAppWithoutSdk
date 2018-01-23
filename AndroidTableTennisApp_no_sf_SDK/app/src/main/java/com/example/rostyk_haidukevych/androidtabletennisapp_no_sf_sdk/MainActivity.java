@@ -19,6 +19,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -46,6 +47,7 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -522,9 +524,6 @@ public class MainActivity extends AppCompatActivity {
             setupViewPagerForAdminTab(viewPager);
 
 
-
-
-
             TabLayout tabLayout = (TabLayout) view.findViewById(R.id.admin_tabs);
             tabLayout.setupWithViewPager(viewPager);
 
@@ -541,12 +540,64 @@ public class MainActivity extends AppCompatActivity {
 
 
         public static class AdminPlayersFragment extends Fragment {
+            private TableLayout tableLayout;
 
             @Nullable
             @Override
             public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
                 View view = inflater.inflate(R.layout.players_admin_fragment, container, false);
+
+                if (view==null) {
+                    try {
+                        Thread.sleep(1000);
+                        onCreateView(inflater,container,savedInstanceState);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                tableLayout = view.findViewById(R.id.admin_players_table);
+
+                Button savePlayersAccessChanges = view.findViewById(R.id.save_players_changes);
+
+                savePlayersAccessChanges.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        System.out.println("Changes");
+                    }
+                });
+
+                for (Player__c player : PlayerSession.allPlayersSync.values()) {
+                    addTableRow(player);
+                }
+
                 return view;
+            }
+
+            private void addTableRow(Player__c player){
+                TableRow tableRow = new TableRow(getActivity());
+
+                TextView textView = new TextView(getActivity());
+                textView.setText(player.Name);
+                textView.setTextSize(TypedValue.COMPLEX_UNIT_DIP,15);
+                tableRow.addView(textView);
+
+                Spinner spinner = new Spinner(getActivity());
+                List<String> spinnerItems = new ArrayList<String>();
+                if (player.IsManager__c) {
+                    spinnerItems.add("Manager");
+                    spinnerItems.add("Simple");
+                } else {
+                    spinnerItems.add("Simple");
+                    spinnerItems.add("Manager");
+                }
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(getActivity(),
+                        android.R.layout.simple_spinner_item, spinnerItems);
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(dataAdapter);
+                tableRow.addView(spinner);
+
+                tableLayout.addView(tableRow);
             }
 
         }

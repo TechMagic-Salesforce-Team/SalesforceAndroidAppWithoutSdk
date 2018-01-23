@@ -12,6 +12,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.TournamentSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Tournament__c;
 import com.google.gson.Gson;
@@ -70,6 +71,13 @@ public class CreateTournamentActivity extends Activity {
                 createTournamentHttp(tournament__c);
             }
         });
+
+        Button loginLogoutButton = findViewById(R.id.login_logout_button);
+        if (PlayerSession.currentPlayer != null) {
+            loginLogoutButton.setText("Logout");
+        } else {
+            loginLogoutButton.setText("Login");
+        }
 
 
     }
@@ -139,4 +147,14 @@ public class CreateTournamentActivity extends Activity {
         });
     }
 
+    public void onLoginLogoutClick(View v) {
+        if (PlayerSession.currentPlayer == null) {
+            Intent loginActivity = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(loginActivity);
+        } else {
+            PlayerSession.currentPlayer = null;
+            finish();
+            startActivity(getIntent());;
+        }
+    }
 }

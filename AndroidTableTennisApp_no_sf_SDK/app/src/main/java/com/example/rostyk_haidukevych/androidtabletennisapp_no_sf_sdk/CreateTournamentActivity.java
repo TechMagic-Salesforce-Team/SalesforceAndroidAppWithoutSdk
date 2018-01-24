@@ -95,7 +95,7 @@ public class CreateTournamentActivity extends Activity {
 
     private void createTournamentHttp(final Tournament__c tournament){
         Sf_Rest_Syncronizer restSyncronizer = Sf_Rest_Syncronizer.getInstance();
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         MediaType Encoded = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(Encoded, new Gson().toJson(tournament));
         Request request = new Request.Builder()

@@ -108,7 +108,7 @@ public class GamesListActivity extends ListActivity {
     }
 
     private void loadAllGamesOfTournament(String soql) {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                 "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
                 + soql;
@@ -179,7 +179,7 @@ public class GamesListActivity extends ListActivity {
 
     private void checkIfPlayerAppliedToTheTournament(String soql) {
         try {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
             String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                     "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
                     + soql;
@@ -224,7 +224,7 @@ public class GamesListActivity extends ListActivity {
 
     private void applyDisapplyForTournament() {
         try {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
             String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                     "/services/apexrest/application/apply";
 

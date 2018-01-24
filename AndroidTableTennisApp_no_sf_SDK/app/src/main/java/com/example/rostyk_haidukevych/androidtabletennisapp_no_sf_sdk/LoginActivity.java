@@ -230,7 +230,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private boolean findPlayerByEmailAndPasswordRest(final String email, String password) {
         String soql = "SELECT+Id,Name,IsManager__c,Email__c,Password__c,Image__c+from+Player__c+where"
                 + "+Email__c+=+'" + email + "'";
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                 "/services/data/v" + Sf_Rest_Syncronizer.getInstance().getVersionNumber() + "/query?q="
                 + soql;
@@ -285,7 +285,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     //because Force.com api does not get data about Password__c (return this *********)
     private boolean findPlayerByEmailAndPasswordRestCustomApi(final String email, final String password) {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         String url = Sf_Rest_Syncronizer.getInstance().getAuthSettings().getInstance_url() +
                 "/services/apexrest/players/credentials?email=" + email+"&password="+password;
         System.out.println("url : " + url);

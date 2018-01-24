@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.app.AppCompatActivity;
@@ -385,19 +386,19 @@ public class MainActivity extends AppCompatActivity {
                 profileLayoutDataLoader.loadAndInitData(false);
 
                 if (IMAGE_URL != null) {
-                    AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask().execute(IMAGE_URL);
+                    //AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask().execute(IMAGE_URL);
                     if (PlayerSession.playerBitmaps.get(PlayerSession.currentPlayer.Id) == null) {
                         System.out.println("NOT NULL");
-                        try {
-                            profileImage.setImageBitmap(task.get());
-                            while (task.get() == null) {
-                            }
-                            PlayerSession.playerBitmaps.put(PlayerSession.currentPlayer.Id, task.get());
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        } catch (ExecutionException e) {
-                            e.printStackTrace();
-                        }
+                        Bitmap bitmap = BitmapImgAsyncTask.downloadBitmapOkHttp(PlayerSession.currentPlayer.Image__c);
+                        PlayerSession.playerBitmaps.put(PlayerSession.currentPlayer.Id, bitmap);
+                        profileImage.setImageBitmap(bitmap);
+//                        try {
+//                            //profileImage.setImageBitmap(task.get());
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        } catch (ExecutionException e) {
+//                            e.printStackTrace();
+//                        }
                     } else {
                         profileImage.setImageBitmap(PlayerSession.playerBitmaps.get(PlayerSession.currentPlayer.Id));
                     }
@@ -491,10 +492,36 @@ public class MainActivity extends AppCompatActivity {
             tableRow.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    System.out.println("Clicked");
                     System.out.println(player.Name);
                     PlayerSession.playerSelected = player;
+                    if (PlayerSession.playerSelected.Image__c != null
+                            && PlayerSession.playerBitmaps.get(PlayerSession.playerSelected.Id) == null) {
+                        final AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity())
+                                .setTitle("Loading player data")
+                                .setMessage("Wait until all data about current player will be loaded");
+                        final AlertDialog alert = dialog.create();
+                        alert.show();
+                        final Handler handler = new Handler();
+                        final Runnable runnable = new Runnable() {
+                            @Override
+                            public void run() {
+                                if (alert.isShowing()) {
+                                    alert.dismiss();
+                                }
+                            }
+                        };
+                        alert.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                            @Override
+                            public void onDismiss(DialogInterface dialog) {
+                                handler.removeCallbacks(runnable);
+                            }
+                        });
+                        handler.postDelayed(runnable, 2000);
+                    }
                     Intent playerActivity = new Intent(getContext(), PlayerProfileActivity.class);
                     startActivity(playerActivity);
+                    System.out.println("Activity loaded");
                 }
             });
 
@@ -697,7 +724,7 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onClick(View v) {
                             System.out.println("Start tournament "+tournamentId);
-                            OkHttpClient client = new OkHttpClient();
+                            OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
                             Sf_Rest_Syncronizer restSyncronizer = Sf_Rest_Syncronizer.getInstance();
                             MediaType Encoded = MediaType.parse("application/json");
                             RequestBody body = RequestBody.create(Encoded,
@@ -854,7 +881,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             PlayerSession.currentPlayer = null;
             finish();
-            startActivity(getIntent());;
+            startActivity(getIntent());
         }
     }
 

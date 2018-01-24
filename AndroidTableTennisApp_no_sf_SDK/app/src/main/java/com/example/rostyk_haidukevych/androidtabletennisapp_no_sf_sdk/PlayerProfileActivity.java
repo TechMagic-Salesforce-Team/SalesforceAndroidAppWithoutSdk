@@ -1,6 +1,9 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +18,7 @@ import android.widget.TextView;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.R;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
+import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.TournamentSession;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sf.sync.classes.Player__c;
 
 import org.json.JSONObject;
@@ -42,7 +46,6 @@ public class PlayerProfileActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_profile);
-
         ImageView playerImg = findViewById(R.id.profile_image);
         playerSelected = PlayerSession.playerSelected;
 
@@ -60,13 +63,12 @@ public class PlayerProfileActivity extends Activity {
         } else {
             if (PlayerSession.playerBitmaps.get(playerSelected.Id) == null) {
                 try {
-                    AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask();
-                    task.execute(playerSelected.Image__c);
-                    PlayerSession.playerBitmaps.put(playerSelected.Id, task.get());
+                    //AsyncTask<String, Void, Bitmap> task = new BitmapImgAsyncTask();
+                    //task.execute(playerSelected.Image__c);
+                    Bitmap bitmap = BitmapImgAsyncTask.downloadBitmapOkHttp(playerSelected.Image__c);
+                    PlayerSession.playerBitmaps.put(playerSelected.Id, bitmap);
                     playerImg.setImageBitmap(PlayerSession.playerBitmaps.get(playerSelected.Id));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (ExecutionException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {

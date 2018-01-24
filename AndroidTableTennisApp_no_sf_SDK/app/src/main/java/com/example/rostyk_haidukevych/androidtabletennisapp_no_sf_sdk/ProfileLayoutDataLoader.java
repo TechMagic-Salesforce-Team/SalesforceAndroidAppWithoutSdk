@@ -337,7 +337,7 @@ public class ProfileLayoutDataLoader {
             tryLoadTournaments();
             return;
         }
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         Sf_Rest_Syncronizer restSyncronizer = Sf_Rest_Syncronizer.getInstance();
         String url = restSyncronizer.getAuthSettings().getInstance_url()
                 +"/services/apexrest/api/get/tournaments/player?playerId="
@@ -400,7 +400,7 @@ public class ProfileLayoutDataLoader {
         profile_tournamentsSync.clear();
         clearTable(profile_tableLayout);
         Sf_Rest_Syncronizer restSyncronizer = Sf_Rest_Syncronizer.getInstance();
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = Sf_Rest_Syncronizer.enableTls12OnPreLollipop();//new OkHttpClient();
         String url = restSyncronizer.getAuthSettings().getInstance_url() +
                 "/services/data/v" + restSyncronizer.getVersionNumber() + "/query?q="
                 + soql;

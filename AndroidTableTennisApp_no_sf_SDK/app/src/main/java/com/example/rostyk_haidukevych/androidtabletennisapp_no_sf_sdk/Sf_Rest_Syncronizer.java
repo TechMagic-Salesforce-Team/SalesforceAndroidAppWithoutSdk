@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.PlayerSession;
@@ -16,18 +17,26 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.ExecutionException;
 
+import javax.net.ssl.SSLContext;
+
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.ConnectionSpec;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import okhttp3.TlsVersion;
 
 /**
  * Created by rostyk_haidukevych on 1/15/18.
@@ -69,17 +78,12 @@ public class Sf_Rest_Syncronizer {
     }
 
     public void auth() {
-        OkHttpClient client = new OkHttpClient();
-
+        OkHttpClient client = enableTls12OnPreLollipop();//new OkHttpClient();
         MediaType Encoded = MediaType.parse("application/x-www-form-urlencoded");
-
         String bodyParams = "grant_type=password&username="+ORG_USERNAME+"&password="+ORG_PASSWORD
                 + ORG_SECURITY_TOKEN+"&client_id="+CLIENT_ID+"&client_secret="+CLIENT_SECRET;
-
         System.out.println("Body parameters: "+bodyParams);
-
         RequestBody body = RequestBody.create(Encoded, bodyParams);
-
         Request request = new Request.Builder()
                 .url(LOGIN_URL)
                 .post(body)
@@ -129,7 +133,7 @@ public class Sf_Rest_Syncronizer {
 //        }
 
         try {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = enableTls12OnPreLollipop(); //new OkHttpClient();
             String url = authSettings.getInstance_url() + "/services/data/";
             System.out.println("url : "+url);
 
@@ -168,7 +172,7 @@ public class Sf_Rest_Syncronizer {
 
     public void getAllPlayersSync(String soql) {
         try {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = enableTls12OnPreLollipop();//new OkHttpClient();
             String url = authSettings.getInstance_url() + "/services/data/v"+getVersionNumber()+"/query?q="+soql;
             System.out.println("url : "+url);
 
@@ -274,6 +278,36 @@ public class Sf_Rest_Syncronizer {
     public RestAuthSfSettings getAuthSettings() {
         return authSettings;
     }
+
+
+    public static OkHttpClient enableTls12OnPreLollipop() {
+        if (Build.VERSION.SDK_INT >= 16 && Build.VERSION.SDK_INT < 21) {
+            try {
+                SSLContext sc = SSLContext.getInstance("TLSv1.2");
+                sc.init(null, null, null);
+                //client.sslSocketFactory(new Tls12SocketFactory(sc.getSocketFactory()));
+
+                ConnectionSpec cs = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)
+                        .tlsVersions(TlsVersion.TLS_1_2)
+                        .build();
+                List<ConnectionSpec> specs = new ArrayList<>();
+                specs.add(cs);
+                specs.add(ConnectionSpec.COMPATIBLE_TLS);
+                specs.add(ConnectionSpec.CLEARTEXT);
+
+                OkHttpClient client = new OkHttpClient.Builder().connectionSpecs(specs).sslSocketFactory
+                        (new Tls12SocketFactory(sc.getSocketFactory())).build();
+                return client;
+            } catch (NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            } catch (KeyManagementException e) {
+                e.printStackTrace();
+            }
+        }
+        return new OkHttpClient();
+    }
+
+
 
     public class RestAuthSfSettings {
         String access_token;

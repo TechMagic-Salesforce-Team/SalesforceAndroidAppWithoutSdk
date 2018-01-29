@@ -1,13 +1,18 @@
 package com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.R;
 import com.example.rostyk_haidukevych.androidtabletennisapp_no_sf_sdk.sessions.GameSession;
@@ -20,6 +25,7 @@ import com.google.gson.Gson;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.w3c.dom.Text;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -152,17 +158,77 @@ public class GamesListActivity extends ListActivity {
                                     GamesListActivity.this, R.layout.mylist,
                                     R.id.Itemname, values));
 
-//                            gamesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//
-//                                @Override
-//                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                                    Game__c game = positionIdGame.get(position);
-//                                    System.out.println("Game selected: " + game.toString());
-//                                    GameSession.gameSelected = game;
-//                                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-//                                    startActivity(intent);
-//                                }
-//                            });
+                            gamesListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+                                @Override
+                                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                    if (PlayerSession.currentPlayer == null) return;
+                                    Player__c currentPlayer = PlayerSession.currentPlayer;
+                                    final Game__c game = positionIdGame.get(position);
+
+
+                                    if (game.FirstCompetitor__c.equals(currentPlayer.Id)
+                                        || game.SecondCompetitor__c.equals(currentPlayer.Id)
+                                        ) {
+                                        System.out.println("Game selected: " + game.toString());
+                                        GameSession.gameSelected = game;
+
+                                        AlertDialog.Builder builderSingle = new AlertDialog.Builder(GamesListActivity.this);
+                                        builderSingle.setTitle("Inserting results of the game");
+                                        LayoutInflater inflater = GamesListActivity.this.getLayoutInflater();
+                                        View dialogView = inflater.inflate(R.layout.game_edit_layout, null);
+                                        builderSingle.setView(dialogView);
+                                        TextView firstCompName = dialogView.findViewById(R.id.firstCompName);
+                                        TextView secondCompName = dialogView.findViewById(R.id.secondCompName);
+
+                                        firstCompName.setText(PlayerSession.allPlayersSync.get(game.FirstCompetitor__c).Name);
+                                        secondCompName.setText(PlayerSession.allPlayersSync.get(game.SecondCompetitor__c).Name);
+
+                                        EditText firstCompetitorScore = dialogView.findViewById(R.id.firstCompScore);
+                                        firstCompetitorScore.setText(game.FirstCompetitorScore__c);
+
+                                        EditText secondCompetitorScore = dialogView.findViewById(R.id.secondCompScore);
+                                        secondCompetitorScore.setText(game.SecondCompetitorScore__c);
+
+                                        if (!(game.FirstCompetitorAccept__c && game.SecondCompetitorAccept__c)) {
+                                            if (
+                                                    (game.SecondCompetitorAccept__c
+                                                            && game.FirstCompetitor__c.equals(PlayerSession.currentPlayer.Id))
+                                                    ||
+                                                            (game.FirstCompetitorAccept__c && game.SecondCompetitor__c.equals(PlayerSession.currentPlayer.Id))
+                                                    ) {
+                                                builderSingle.setNeutralButton("submit", new DialogInterface.OnClickListener() {
+                                                    @Override
+                                                    public void onClick(DialogInterface dialog, int which) {
+                                                        System.out.println(game.FirstCompetitorAccept__c);
+                                                        System.out.println(game.SecondCompetitorAccept__c);
+                                                        dialog.dismiss();
+                                                    }
+                                                });
+                                            }
+
+                                            builderSingle.setNegativeButton("insert", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    dialog.dismiss();
+                                                }
+                                            });
+                                        } else {
+                                            //firstCompetitorScore.setActivated(false);
+                                            //secondCompetitorScore.setActivated(false);
+                                            firstCompetitorScore.setEnabled(false);
+                                            secondCompetitorScore.setEnabled(false);
+                                        }
+                                        builderSingle.setPositiveButton("cancel", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                        builderSingle.show();
+                                    }
+                                }
+                            });
                         } catch (JSONException ex) {
 
                         } catch (NullPointerException e) {

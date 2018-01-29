@@ -325,7 +325,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                         PlayerSession.currentPlayer.Id = responseObject.getString("Id");
                         PlayerSession.currentPlayer.Name = responseObject.getString("Name");
                         PlayerSession.currentPlayer.IsManager__c = responseObject.getBoolean("IsManager__c");
-                        PlayerSession.currentPlayer.Image__c = responseObject.getString("Image__c");
+                        try {
+                            PlayerSession.currentPlayer.Image__c = responseObject.getString("Image__c");
+                        } catch (Exception ex) {
+                            PlayerSession.currentPlayer.Image__c = null;
+                        }
                         PlayerSession.currentPlayer.role =
                                 responseObject.getBoolean("IsManager__c")
                                 ? Player__c.ROLE.ADMIN : Player__c.ROLE.USER;
